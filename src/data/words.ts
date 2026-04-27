@@ -505,6 +505,15 @@ import { C2_WORDS_PART157 } from './c2WordsPart157';
 import { C2_WORDS_PART158 } from './c2WordsPart158';
 import { C2_WORDS_PART159 } from './c2WordsPart159';
 import { C2_WORDS_PART160 } from './c2WordsPart160';
+import { C2_WORDS_PART161 } from './c2WordsPart161';
+import { C2_WORDS_PART162 } from './c2WordsPart162';
+import { C2_WORDS_PART163 } from './c2WordsPart163';
+import { C2_WORDS_PART164 } from './c2WordsPart164';
+import { C2_WORDS_PART165 } from './c2WordsPart165';
+import { C2_WORDS_PART166 } from './c2WordsPart166';
+import { C2_WORDS_PART167 } from './c2WordsPart167';
+import { C2_WORDS_PART168 } from './c2WordsPart168';
+import { C2_WORDS_PART169 } from './c2WordsPart169';
 
 export const ALL_A1_WORDS: WordEntry[] = [
   ...A1_STARTER_WORDS_PART1, ...A1_STARTER_WORDS_PART2, ...A1_STARTER_WORDS_PART3, ...A1_STARTER_WORDS_PART4,
@@ -748,5 +757,14 @@ export const ALL_C2_WORDS: WordEntry[] = [
   ...C2_WORDS_PART157,
   ...C2_WORDS_PART158,
   ...C2_WORDS_PART159,
-  ...C2_WORDS_PART160
+  ...C2_WORDS_PART160,
+  ...C2_WORDS_PART161,
+  ...C2_WORDS_PART162,
+  ...C2_WORDS_PART163,
+  ...C2_WORDS_PART164,
+  ...C2_WORDS_PART165,
+  ...C2_WORDS_PART166,
+  ...C2_WORDS_PART167,
+  ...C2_WORDS_PART168,
+  ...C2_WORDS_PART169
 ];

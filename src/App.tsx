@@ -5,68 +5,91 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { 
-  Search, BrainCircuit, Quote, 
-  Settings, User, ChevronRight, LayoutGrid, List,
-  Sparkles, GraduationCap, Trophy, Bookmark, 
-  CheckCircle2, Volume2, ArrowRight, PlayCircle,
+  Search, Book, BrainCircuit, Quote, BookOpen, 
+  List, Sparkles, GraduationCap, Trophy, Bookmark, 
+  Volume2, VolumeX, ArrowRight, PlayCircle, Video,
   Menu, X, Filter, SortAsc, SortDesc, Zap,
   Globe, Languages, Star, Clock, Heart,
-  Settings2, HelpCircle, LogOut, Bell,
-  SearchCheck, BookMarked, Brain,
-  MessageSquare, Lightbulb, Target, Award,
-  ChevronLeft, RefreshCw, ChevronDown,
-  VolumeX, Gauge, AlertCircle, UserRound, Info, Send, Copy, ShieldCheck, ArrowLeftRight
+  HelpCircle, BookmarkCheck, CheckCircle2,
+  ChevronLeft, Trash2, ChevronDown,
+  Gauge, AlertCircle, UserRound, Info, Send, Camera, Save,
+  ChevronRight, Bot, MessageSquare, MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { WordEntry, Level, ViewMode } from './types';
-import { generateNewWord, generateSpeech, translateText, WordData, VoiceName } from './services/geminiService';
+import { WordEntry, Level, ViewMode, UserProfile, Story, StoryQuestion } from './types';
 import { 
   ALL_A1_WORDS, ALL_A2_WORDS, ALL_B1_WORDS, ALL_B2_WORDS, ALL_C1_WORDS, ALL_C2_WORDS 
 } from './data/words';
 import { PHRASAL_VERBS } from './data/phrasalVerbs';
 import { IDIOMS } from './data/idioms';
 import { MOTIVATIONAL_QUOTES } from './data/motivationalQuotes';
-import { WordCard } from './components/WordCard';
-import { Quiz } from './components/Quiz';
+import { STORIES } from './data/stories';
+import { GRAMMAR_TOPICS, GrammarTopic } from './data/grammar';
+import Translator from './components/Translator';
+import Chatbot from './components/Chatbot';
+import SocialLinks from './components/SocialLinks';
+import VideoTranslator from './components/VideoTranslator';
+import ConversationView from './components/ConversationView';
 
-const LEVELS: { id: Level; title: string }[] = [
-  { id: 'A1', title: 'Starter - ١٠٠٠ پەیڤێن سەرەتایی' },
-  { id: 'A2', title: 'Elementary - ٢٠٠٠ پەیڤێن ئاستێ دوو' },
-  { id: 'B1', title: 'Intermediate - ٣٠٠٠ پەیڤێن ئاستێ سێ' },
-  { id: 'B2', title: 'Upper Intermediate - ٤٠٠٠ پەیڤێن ئاستێ چوار' },
-  { id: 'C1', title: 'Advanced Level - ٥٠٠٠ پەیڤێن ئاستێ پێنج' },
-  { id: 'C2', title: 'Expert Level - ٨٠٠٠ پەیڤێن ئاستێ شەش' },
+const LEVELS: { id: Level; title: string; count: number }[] = [
+  { id: 'A1', title: 'ئاستێ ئێکێ - ١٠٠٠ پەیڤ', count: 1000 },
+  { id: 'A2', title: 'ئاستێ دوو - ٢٠٠٠ پەیڤ', count: 2000 },
+  { id: 'B1', title: 'ئاستێ سێ - ٣٠٠٠ پەیڤ', count: 3000 },
+  { id: 'B2', title: 'ئاستێ چوار - ٤٠٠٠ پەیڤ', count: 4000 },
+  { id: 'C1', title: 'ئاستێ پێنج - ٧٠٠٠ پەیڤ', count: 7000 },
+  { id: 'C2', title: 'ئاستێ شەش - ٨٠٠٠ پەیڤ', count: 8000 },
 ];
 const VIEW_MODES: { id: ViewMode; label: string; icon: any }[] = [
-  { id: 'list', label: 'Vocabulary', icon: List },
-  { id: 'quiz', label: 'Practice Quiz', icon: BrainCircuit },
-  { id: 'phrasal', label: 'Phrasal Verbs', icon: Zap },
-  { id: 'idioms', label: 'Idioms', icon: Sparkles },
-  { id: 'quotes', label: 'Motivation', icon: Quote },
-  { id: 'translator', label: 'Translator', icon: Languages },
+  { id: 'list', label: 'پەیڤێن ئاستی', icon: List },
+  { id: 'quiz', label: 'تاقیکردنەوە', icon: BrainCircuit },
+  { id: 'phrasal', label: 'کردارێن لێکدای', icon: Zap },
+  { id: 'idioms', label: 'ئیدیۆمێن ئنگلیزی', icon: Sparkles },
+  { id: 'stories', label: 'چیرۆکێن ئنگلیزی', icon: BookOpen },
+  { id: 'grammar', label: 'ڕێزمان (Grammar)', icon: GraduationCap },
+  { id: 'translator', label: 'وەرگێڕێ زیرەک', icon: Languages },
+  { id: 'chat', label: 'ڕۆبۆتێ زیرەک', icon: MessageSquare },
+  { id: 'video-translator', label: 'وەرگێڕێ ڤیدیۆیان', icon: Video },
+  { id: 'conversations', label: 'بەشێ گفتوگۆیان', icon: MessageCircle },
+  { id: 'saved', label: 'پەیڤێن خەزنکری', icon: BookmarkCheck },
 ];
 
 export default function App() {
   const [displayLimit, setDisplayLimit] = useState(100);
   const [activeLevel, setActiveLevel] = useState<Level>('A1');
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [searchTerm, setSearchTerm] = useState('');
+  
+  useEffect(() => {
+    console.log('Current ViewMode:', viewMode);
+  }, [viewMode]);
+
+  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
+  
+  const [profile, setProfile] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem('user_profile');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [tempProfile, setTempProfile] = useState<UserProfile>({ name: '', imageUrl: '' });
+  
   const [learnedWords, setLearnedWords] = useState<Set<string>>(() => {
     const saved = localStorage.getItem('learned_words');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
   const [bookmarkedWords, setBookmarkedWords] = useState<Set<string>>(() => {
     const saved = localStorage.getItem('bookmarked_words');
-    return saved ? new Set(JSON.parse(saved)) : new Set();
+    if (!saved) return new Set();
+    try {
+      const parsed = JSON.parse(saved);
+      // Normalize to lowercase to prevent duplicates
+      return new Set(Array.isArray(parsed) ? parsed.map((w: string) => w.toLowerCase()) : []);
+    } catch (e) {
+      return new Set();
+    }
   });
-  const [isSpeaking, setIsSpeaking] = useState<string | null>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
 
   // Audio & Speech States
-  const [isQuotaExceeded, setIsQuotaExceeded] = useState(false);
   const [speechSpeed, setSpeechSpeed] = useState<'normal' | 'slow'>('normal');
-  const [speechVoice, setSpeechVoice] = useState<VoiceName>('Puck');
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -78,20 +101,39 @@ export default function App() {
   const [quizFeedback, setQuizFeedback] = useState<'correct' | 'wrong' | null>(null);
 
   // C2 View States
-  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const WORDS_PER_PAGE = 30;
 
-  // Translator States
-  const [translatorInput, setTranslatorInput] = useState('');
-  const [translatorOutput, setTranslatorOutput] = useState('');
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [translationError, setTranslationError] = useState<string | null>(null);
-  const [showSetupHelp, setShowSetupHelp] = useState(false);
+  // Stories States
+  const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
+  const [storyQuizAnswers, setStoryQuizAnswers] = useState<Record<string, number>>({});
+  const [showStoryResults, setShowStoryResults] = useState(false);
+
+  // Grammar States
+  const [selectedGrammarId, setSelectedGrammarId] = useState<string | null>(null);
+
+  const allWords = useMemo(() => {
+    const combined = [
+      ...ALL_A1_WORDS.map(w => ({ ...w, level: 'A1' as Level })),
+      ...ALL_A2_WORDS.map(w => ({ ...w, level: 'A2' as Level })),
+      ...ALL_B1_WORDS.map(w => ({ ...w, level: 'B1' as Level })),
+      ...ALL_B2_WORDS.map(w => ({ ...w, level: 'B2' as Level })),
+      ...ALL_C1_WORDS.map(w => ({ ...w, level: 'C1' as Level })),
+      ...ALL_C2_WORDS.map(w => ({ ...w, level: 'C2' as Level })),
+    ];
+    // Deduplicate by word text (case insensitive)
+    const unique = Array.from(new Map(combined.map(item => [item.word.toLowerCase(), item])).values());
+    // Reverse to show newest first
+    return unique.reverse();
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [activeLevel, searchTerm, viewMode]);
+  }, [activeLevel, globalSearchTerm, viewMode]);
+
+  useEffect(() => {
+    localStorage.setItem('user_profile', JSON.stringify(profile));
+  }, [profile]);
 
   useEffect(() => {
     localStorage.setItem('learned_words', JSON.stringify([...learnedWords]));
@@ -117,9 +159,10 @@ export default function App() {
     });
   }, []);
 
-  const toggleBookmark = useCallback((id: string) => {
+  const toggleBookmark = useCallback((wordText: string) => {
     setBookmarkedWords(prev => {
       const next = new Set(prev);
+      const id = wordText.toLowerCase();
       if (next.has(id)) next.delete(id);
       else next.add(id);
       return next;
@@ -135,7 +178,7 @@ export default function App() {
     setPlayingAudio(null);
   }, []);
 
-  const playAudio = useCallback(async (text: string, id?: string) => {
+  const playAudio = useCallback((text: string, id?: string) => {
     if (playingAudio === (id || text)) {
       stopAudio();
       return;
@@ -144,63 +187,27 @@ export default function App() {
     stopAudio();
     setPlayingAudio(id || text);
 
-    try {
-      if (!isQuotaExceeded) {
-        const base64 = await generateSpeech(text, speechVoice, speechSpeed);
-        const audio = new Audio(`data:audio/mpeg;base64,${base64}`);
-        audioRef.current = audio;
-        audio.onended = () => setPlayingAudio(null);
-        await audio.play();
-      } else {
-        throw new Error('Quota Exceeded');
-      }
-    } catch (error: any) {
-      console.error('Audio error:', error);
-      
-      // Fallback to SpeechSynthesis for any error
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
-      utterance.rate = speechSpeed === 'slow' ? 0.6 : 1;
-      
-      // Try to find a voice that matches the gender
-      const voices = window.speechSynthesis.getVoices();
-      const voice = voices.find(v => {
-        const name = v.name.toLowerCase();
-        if (speechVoice === 'Kore' || speechVoice === 'Zephyr') {
-          return name.includes('female') || name.includes('woman') || name.includes('samantha') || name.includes('victoria');
-        } else {
-          return name.includes('male') || name.includes('man') || name.includes('alex') || name.includes('fred');
-        }
-      });
-      
-      if (voice) {
-        utterance.voice = voice;
-      }
-      
-      utterance.onend = () => setPlayingAudio(null);
-      utterance.onerror = () => setPlayingAudio(null);
-      window.speechSynthesis.speak(utterance);
-      
-      if (error?.message?.includes('429') || error?.status === 'RESOURCE_EXHAUSTED' || error?.message === 'Quota Exceeded') {
-        setIsQuotaExceeded(true);
-        // Reset quota exceeded after 1 hour
-        setTimeout(() => setIsQuotaExceeded(false), 3600000);
-      }
-    }
-  }, [playingAudio, stopAudio, speechVoice, speechSpeed, isQuotaExceeded]);
-
-  const currentLevel = useMemo(() => LEVELS.find(l => l.id === activeLevel), [activeLevel]);
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = speechSpeed === 'slow' ? 0.4 : 0.6;
+    utterance.onend = () => setPlayingAudio(null);
+    utterance.onerror = () => setPlayingAudio(null);
+    window.speechSynthesis.speak(utterance);
+  }, [playingAudio, stopAudio, speechSpeed]);
 
   const currentLevelWords = useMemo(() => {
+    let baseWords: WordEntry[] = [];
     switch (activeLevel) {
-      case 'A1': return ALL_A1_WORDS;
-      case 'A2': return ALL_A2_WORDS;
-      case 'B1': return ALL_B1_WORDS;
-      case 'B2': return ALL_B2_WORDS;
-      case 'C1': return ALL_C1_WORDS;
-      case 'C2': return ALL_C2_WORDS;
-      default: return [];
+      case 'A1': baseWords = ALL_A1_WORDS.map(w => ({ ...w, level: 'A1' as Level })); break;
+      case 'A2': baseWords = ALL_A2_WORDS.map(w => ({ ...w, level: 'A2' as Level })); break;
+      case 'B1': baseWords = ALL_B1_WORDS.map(w => ({ ...w, level: 'B1' as Level })); break;
+      case 'B2': baseWords = ALL_B2_WORDS.map(w => ({ ...w, level: 'B2' as Level })); break;
+      case 'C1': baseWords = ALL_C1_WORDS.map(w => ({ ...w, level: 'C1' as Level })); break;
+      case 'C2': baseWords = ALL_C2_WORDS.map(w => ({ ...w, level: 'C2' as Level })); break;
+      default: baseWords = [];
     }
+    
+    return baseWords.reverse();
   }, [activeLevel]);
 
   const generateQuizQuestion = useCallback(() => {
@@ -248,23 +255,54 @@ export default function App() {
   }, [viewMode, activeLevel, quizType, generateQuizQuestion]);
 
   const filteredWords = useMemo(() => {
-    if (!searchTerm) return currentLevelWords;
-    const term = searchTerm.toLowerCase();
-    return currentLevelWords.filter(w => 
+    if (!globalSearchTerm) return currentLevelWords;
+    
+    const term = globalSearchTerm.toLowerCase();
+    
+    // Search across all words for global search
+    const filtered = allWords.filter(w => 
       w.word.toLowerCase().includes(term) ||
       w.meaning.toLowerCase().includes(term) ||
       w.definition.toLowerCase().includes(term) ||
       (w.definitionEnglish && w.definitionEnglish.toLowerCase().includes(term))
     );
-  }, [currentLevelWords, searchTerm]);
+
+    // Sort to prioritize exact matches for the word
+    return filtered.sort((a, b) => {
+      const aWord = a.word.toLowerCase();
+      const bWord = b.word.toLowerCase();
+      
+      // Exact match first
+      if (aWord === term && bWord !== term) return -1;
+      if (bWord === term && aWord !== term) return 1;
+      
+      // Starts with term second
+      if (aWord.startsWith(term) && !bWord.startsWith(term)) return -1;
+      if (bWord.startsWith(term) && !aWord.startsWith(term)) return 1;
+      
+      return 0;
+    });
+  }, [currentLevelWords, allWords, globalSearchTerm]);
 
   useEffect(() => {
     setDisplayLimit(100);
-  }, [activeLevel, searchTerm]);
+  }, [activeLevel, globalSearchTerm]);
+
+  const bookmarkedWordsList = useMemo(() => {
+    return allWords.filter(word => bookmarkedWords.has(word.word.toLowerCase()));
+  }, [allWords, bookmarkedWords]);
 
   const displayedWords = useMemo(() => {
+    if (viewMode === 'saved') {
+      const term = globalSearchTerm.toLowerCase();
+      if (!term) return bookmarkedWordsList;
+      return bookmarkedWordsList.filter(w => 
+        w.word.toLowerCase().includes(term) ||
+        w.meaning.toLowerCase().includes(term)
+      );
+    }
     return filteredWords.slice(0, displayLimit);
-  }, [filteredWords, displayLimit]);
+  }, [filteredWords, displayLimit, viewMode, bookmarkedWordsList, globalSearchTerm]);
 
   const hasMore = filteredWords.length > displayLimit;
   const loadMore = () => setDisplayLimit(prev => prev + 100);
@@ -292,6 +330,42 @@ export default function App() {
         </div>
         
         <div className="relative z-10 max-w-4xl mx-auto">
+          {/* Profile Section - Improved & Responsive */}
+          <div className="absolute top-0 right-0 p-4 md:p-6 z-50">
+            {profile ? (
+              <button 
+                onClick={() => setShowProfileModal(true)}
+                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 p-1 pr-2 md:p-1.5 md:pr-3 rounded-full transition-all backdrop-blur-md border border-white/20 shadow-lg group"
+              >
+                {profile.imageUrl ? (
+                  <img 
+                    src={profile.imageUrl} 
+                    alt={profile.name} 
+                    className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-[#f1c40f] group-hover:scale-110 transition-transform"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-[#f1c40f] bg-stone-100 flex items-center justify-center text-stone-400 group-hover:scale-110 transition-transform">
+                    <UserRound size={18} />
+                  </div>
+                )}
+                <span className="font-bold text-[10px] md:text-sm kurdish-text hidden sm:inline">{profile.name}</span>
+              </button>
+            ) : (
+              <button 
+                onClick={() => {
+                  setTempProfile({ name: '', imageUrl: '' });
+                  setShowProfileModal(true);
+                }}
+                className="flex items-center gap-1.5 bg-[#f1c40f] hover:bg-[#f39c12] text-[#2c3e50] px-3 py-1 md:px-6 md:py-2 rounded-full font-bold transition-all shadow-lg kurdish-text text-[10px] md:text-sm"
+              >
+                <UserRound size={14} className="md:w-5 md:h-5" />
+                <span className="hidden xs:inline">ڤەکرنا ئەکوانتی</span>
+                <span className="xs:hidden">ئەکوانت</span>
+              </button>
+            )}
+          </div>
+
           <div className="flex justify-center gap-8 mb-10">
             <motion.div
               whileHover={{ y: -5, scale: 1.05 }}
@@ -325,7 +399,7 @@ export default function App() {
             transition={{ delay: 0.2 }}
           >
             <h1 className="text-4xl md:text-6xl font-black kurdish-text mb-6 tracking-tight leading-tight">
-              دەرگەهــەك ژ بوو <span className="text-[#f1c40f]">فێربوونا</span> زمانێ ئنگلیزی
+              باشترین مالپەر ژ بوو <span className="text-[#f1c40f]">فێربوونا</span> زمانێ ئنگلیزی ب شێوازێ بادینی
             </h1>
             <div className="inline-flex items-center gap-4 px-8 py-3 bg-white/5 rounded-full border border-white/10 backdrop-blur-sm">
               <span className="text-[#f1c40f] text-2xl font-bold kurdish-text">اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ</span>
@@ -365,6 +439,38 @@ export default function App() {
             </li>
             <li>
               <button 
+                onClick={() => {
+                  setViewMode('stories');
+                  setSelectedStoryId(null);
+                  setShowStoryResults(false);
+                  setStoryQuizAnswers({});
+                }}
+                className={viewMode === 'stories' ? 'active' : ''}
+              >
+                <i className="fas fa-book-open"></i> بەشێ چیرۆکا
+              </button>
+            </li>
+            <li>
+              <button 
+                onClick={() => {
+                  setViewMode('grammar');
+                  setSelectedGrammarId(null);
+                }}
+                className={viewMode === 'grammar' ? 'active' : ''}
+              >
+                <i className="fas fa-graduation-cap"></i> ڕێزمان (Grammar)
+              </button>
+            </li>
+            <li>
+              <button 
+                onClick={() => setViewMode('translator')}
+                className={viewMode === 'translator' ? 'active' : ''}
+              >
+                <i className="fas fa-language"></i> وەرگێڕێ زیرەک
+              </button>
+            </li>
+            <li>
+              <button 
                 onClick={() => setViewMode('phrasal')}
                 className={viewMode === 'phrasal' ? 'active' : ''}
               >
@@ -381,55 +487,68 @@ export default function App() {
             </li>
             <li>
               <button 
-                onClick={() => setViewMode('translator')}
-                className={viewMode === 'translator' ? 'active' : ''}
+                onClick={() => setViewMode('chat')}
+                className={viewMode === 'chat' ? 'active' : ''}
               >
-                <i className="fas fa-language"></i> بەشێ وەرگێڕانێ
+                <i className="fas fa-robot"></i> ڕۆبۆتێ زیرەک
+              </button>
+            </li>
+            <li>
+              <button 
+                onClick={() => setViewMode('video-translator')}
+                className={viewMode === 'video-translator' ? 'active' : ''}
+              >
+                <i className="fas fa-video"></i> وەرگێڕێ ڤیدیۆیان
+              </button>
+            </li>
+            <li>
+              <button 
+                onClick={() => setViewMode('conversations')}
+                className={viewMode === 'conversations' ? 'active' : ''}
+              >
+                <i className="fas fa-comments"></i> گفتوگۆ
+              </button>
+            </li>
+            <li>
+              <button 
+                onClick={() => setViewMode('saved')}
+                className={viewMode === 'saved' ? 'active' : ''}
+              >
+                <i className="fas fa-bookmark"></i> پەیڤێن خەزنکری
+                {bookmarkedWords.size > 0 && (
+                  <span className="ml-2 bg-[#e67e22] text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
+                    {bookmarkedWords.size}
+                  </span>
+                )}
               </button>
             </li>
           </ul>
         </div>
       </nav>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
-        {isQuotaExceeded && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3 text-amber-800 shadow-sm"
-          >
-            <div className="p-2 bg-amber-100 rounded-xl">
-              <AlertCircle size={20} />
-            </div>
-            <div className="flex-1">
-              <p className="font-bold text-sm kurdish-text">ئەنجامێن زێدە (Quota Exceeded)</p>
-              <p className="text-xs kurdish-text opacity-90">تە گەهشتە سنورێ خۆ یێ فێربوونا بێبەرامبەر بۆ ئەڤرۆ. هیڤی دکەین پاشتر یان سوبەهی تاقی بکەڤە. نوکە دێ دەنگێ ئامێرێ تە هێتە بکارئینان.</p>
-            </div>
-            <button onClick={() => setIsQuotaExceeded(false)} className="p-2 hover:bg-amber-100 rounded-lg transition-colors">
-              <X size={16} />
-            </button>
-          </motion.div>
-        )}
+      <main className={`flex-1 max-w-6xl mx-auto w-full px-4 ${viewMode === 'chat' ? 'py-4' : 'py-8'}`}>
         {/* Motivational Quotes Section */}
-        <div className="mb-12">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={quoteIndex}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="bg-stone-50 border-l-4 border-[#2980b9] p-6 rounded-r-2xl shadow-sm relative"
-            >
-              <Quote className="absolute -top-3 -left-3 text-[#2980b9]/20" size={40} />
-              <p className="text-xl font-medium text-stone-800 english-text mb-2 italic">
-                "{MOTIVATIONAL_QUOTES[quoteIndex].english}"
-              </p>
-              <p className="text-lg text-stone-600 kurdish-text">
-                {MOTIVATIONAL_QUOTES[quoteIndex].kurdish}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+        {viewMode !== 'chat' && (
+          <div className="mb-12">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={quoteIndex}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-stone-50 border-l-4 border-[#2980b9] p-6 rounded-r-2xl shadow-sm relative"
+              >
+                <Quote className="absolute -top-3 -left-3 text-[#2980b9]/20" size={40} />
+                <p className="text-xl font-medium text-stone-800 english-text mb-2 italic">
+                  "{MOTIVATIONAL_QUOTES[quoteIndex].english}"
+                </p>
+                <p className="text-lg text-stone-600 kurdish-text">
+                  {MOTIVATIONAL_QUOTES[quoteIndex].kurdish}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        )}
 
         {/* View Mode Toggle & Search */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
@@ -439,22 +558,40 @@ export default function App() {
                viewMode === 'quiz' ? <HelpCircle size={24} /> : 
                viewMode === 'phrasal' ? <Zap size={24} /> :
                viewMode === 'idioms' ? <Sparkles size={24} /> :
-               <Languages size={24} />}
+               viewMode === 'stories' ? <BookOpen size={24} /> :
+               viewMode === 'grammar' ? <GraduationCap size={24} /> :
+               viewMode === 'translator' ? <Languages size={24} /> :
+               viewMode === 'chat' ? <Bot size={24} /> :
+               viewMode === 'video-translator' ? <Video size={24} /> :
+               viewMode === 'conversations' ? <MessageCircle size={24} /> :
+               <Book size={24} />}
             </div>
             <div>
               <h2 className="text-2xl font-bold text-stone-800 kurdish-text">
                 {viewMode === 'list' ? `ئـاسـتـێ ${activeLevel}` : 
                  viewMode === 'quiz' ? 'تـاقـیـکـردنـەوە' : 
-                 viewMode === 'phrasal' ? 'Phrasal Verbs' : 
-                 viewMode === 'idioms' ? 'Idioms (ئیدیۆم)' : 
-                 'بەشێ وەرگێڕانێ'}
+                 viewMode === 'phrasal' ? 'کردارێن لێکدای' :
+                 viewMode === 'idioms' ? 'ئیدیۆمێن ئنگلیزی' :
+                 viewMode === 'stories' ? 'چیرۆکێن ئنگلیزی' :
+                 viewMode === 'grammar' ? 'ڕێزمانا ئنگلیزی' :
+                 viewMode === 'translator' ? 'وەرگێڕێ زیرەک' :
+                 viewMode === 'chat' ? 'ڕۆبۆتێ زیرەک' :
+                 viewMode === 'video-translator' ? 'وەرگێڕێ ڤیدیۆیان' :
+                 viewMode === 'conversations' ? 'بەشێ گفتوگۆیان' :
+                 'پەیڤێن خەزنکری'}
               </h2>
               <p className="text-stone-500 text-sm kurdish-text">
                 {viewMode === 'list' ? 'لیستا هەمی پەیڤان' : 
                  viewMode === 'quiz' ? 'خۆ تاقی بکە' : 
-                 viewMode === 'phrasal' ? 'پەیڤێن لێکدای یێن گرنگ' : 
-                 viewMode === 'idioms' ? 'ئیدیۆمێن زمانێ ئنگلیزی' : 
-                 'وەرگێڕانا دەقێن ئنگلیزی بۆ بادینی'}
+                 viewMode === 'phrasal' ? 'پەیڤێن لێکدای یێن گرنگ' :
+                 viewMode === 'idioms' ? 'ئیدیۆمێن زمانێ ئنگلیزی' :
+                 viewMode === 'stories' ? 'فێربوونا ئنگلیزی ب چیرۆکان' :
+                 viewMode === 'grammar' ? 'هەمی بابەتێن ڕێزمانێ ب بادینی' :
+                 viewMode === 'translator' ? 'وەرگێڕێ ئنگلیزی بۆ کوردی و بەروڤاژی' :
+                 viewMode === 'chat' ? 'دگەل ڕۆبۆتی باخڤە ب بادینی' :
+                 viewMode === 'video-translator' ? 'وەرگێڕانا سەبتایتلێن ڤیدیۆیێ بۆ بادینی' :
+                 viewMode === 'conversations' ? 'فێربوونا ئنگلیزی ب رێکا گفتوگۆیان' :
+                 'لیستا پەیڤێن تە خەزنکرین'}
               </p>
             </div>
           </div>
@@ -480,55 +617,27 @@ export default function App() {
                     </button>
                   </div>
                 </div>
-
-                {/* Voice Selection */}
-                <div className="flex items-center gap-2 border-l border-stone-100 pl-4">
-                  <User size={18} className="text-stone-400" />
-                  <div className="flex bg-stone-50 p-1 rounded-xl gap-1">
-                    <button 
-                      onClick={() => setSpeechVoice('Puck')}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${speechVoice === 'Puck' ? 'bg-blue-500 text-white shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}
-                    >
-                      Male (نێر)
-                    </button>
-                    <button 
-                      onClick={() => setSpeechVoice('Kore')}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${speechVoice === 'Kore' ? 'bg-pink-500 text-white shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}
-                    >
-                      Female (مێ)
-                    </button>
-                  </div>
-                </div>
-
-                {/* Global Stop Button */}
-                {playingAudio && (
-                  <button 
-                    onClick={stopAudio}
-                    className="bg-red-50 text-red-500 p-2 rounded-xl hover:bg-red-100 transition-colors"
-                    title="Stop Audio"
-                  >
-                    <VolumeX size={18} />
-                  </button>
-                )}
               </div>
 
-              <div className="relative w-full md:w-96">
-                <input 
-                  type="text" 
-                  placeholder="لێگەریانا پەیڤا" 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-white border-2 border-stone-100 rounded-2xl py-4 px-12 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#2c3e50] focus:ring-4 focus:ring-[#2c3e50]/5 transition-all kurdish-text shadow-sm"
-                />
-                <Search className="absolute left-4 top-4.5 text-stone-300" size={20} />
-                {searchTerm && (
-                  <button 
-                    onClick={() => setSearchTerm('')}
-                    className="absolute right-4 top-4.5 text-stone-300 hover:text-stone-500"
-                  >
-                    ×
-                  </button>
-                )}
+              <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                <div className="relative w-full md:w-80">
+                  <input 
+                    type="text" 
+                    placeholder="لێگەریانا گشتی (هەمی ئاست)" 
+                    value={globalSearchTerm}
+                    onChange={(e) => setGlobalSearchTerm(e.target.value)}
+                    className="w-full bg-white border-2 border-stone-100 rounded-2xl py-4 px-12 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#2c3e50] focus:ring-4 focus:ring-[#2c3e50]/5 transition-all kurdish-text shadow-sm"
+                  />
+                  <Globe className="absolute left-4 top-4.5 text-stone-300" size={20} />
+                  {globalSearchTerm && (
+                    <button 
+                      onClick={() => setGlobalSearchTerm('')}
+                      className="absolute right-4 top-4.5 text-stone-300 hover:text-stone-500"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -538,227 +647,366 @@ export default function App() {
         <div className="relative">
           <AnimatePresence mode="wait">
             {viewMode === 'translator' ? (
+              <Translator key="translator-view" onSpeak={(text) => playAudio(text, 'translator')} />
+            ) : viewMode === 'chat' ? (
+              <Chatbot key="chat-view" />
+            ) : viewMode === 'video-translator' ? (
+              <VideoTranslator key="video-translator-view" />
+            ) : viewMode === 'conversations' ? (
+              <ConversationView key="conversations-view" />
+            ) : viewMode === 'grammar' ? (
               <motion.div
-                key="translator-view"
+                key="grammar-view"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="max-w-5xl mx-auto space-y-8"
+                className="space-y-8"
               >
-                <div className="bg-white rounded-[2.5rem] shadow-2xl border border-stone-100 overflow-hidden">
-                  {/* Header */}
-                  <div className="bg-stone-50 px-8 py-4 border-b border-stone-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-500 rounded-full text-white">
-                        <Languages size={20} />
-                      </div>
-                      <h2 className="font-bold text-stone-800 tracking-tight">وەرگێڕێ زیرەک (Smart Translator)</h2>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <button 
-                        onClick={() => setShowSetupHelp(!showSetupHelp)}
-                        className={`p-2 transition-colors ${showSetupHelp ? 'text-blue-500' : 'text-stone-400 hover:text-blue-500'}`}
-                        title="Setup Help"
+                {!selectedGrammarId ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {GRAMMAR_TOPICS.map((topic) => (
+                      <motion.button
+                        key={topic.id}
+                        whileHover={{ scale: 1.02, y: -5 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setSelectedGrammarId(topic.id)}
+                        className="bg-white p-8 rounded-[2.5rem] shadow-lg border border-stone-100 text-right hover:shadow-2xl transition-all group relative overflow-hidden"
                       >
-                        <HelpCircle size={18} />
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-stone-50 rounded-bl-[5rem] -mr-16 -mt-16 group-hover:bg-[#2c3e50]/5 transition-colors" />
+                        
+                        <div className="flex items-center justify-between mb-6 relative z-10">
+                          <div className="bg-stone-50 p-4 rounded-2xl text-[#2c3e50] group-hover:bg-[#2c3e50] group-hover:text-white transition-all shadow-sm">
+                            <GraduationCap size={28} />
+                          </div>
+                          <span className="text-[10px] font-black text-[#2c3e50] uppercase tracking-widest bg-[#f1c40f] px-4 py-1.5 rounded-full shadow-sm">
+                            {topic.category}
+                          </span>
+                        </div>
+                        
+                        <div className="relative z-10">
+                          <h3 className="text-2xl font-black text-stone-800 mb-2 kurdish-text group-hover:text-[#2c3e50] transition-colors">
+                            {topic.titleKurdish}
+                          </h3>
+                          <p className="text-stone-400 text-sm font-mono tracking-wider uppercase">
+                            {topic.title}
+                          </p>
+                        </div>
+                        
+                        <div className="mt-6 flex items-center justify-end gap-2 text-[#2c3e50] font-bold text-sm opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
+                          <span className="kurdish-text">دەستپێبکە</span>
+                          <ArrowRight size={16} />
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-stone-100">
+                    {/* Header */}
+                    <div className="bg-gradient-to-br from-[#2c3e50] to-[#34495e] p-10 md:p-16 text-white relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+                      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#f1c40f]/10 rounded-full -ml-32 -mb-32 blur-3xl" />
+                      
+                      <button 
+                        onClick={() => setSelectedGrammarId(null)}
+                        className="absolute top-8 left-8 bg-white/10 hover:bg-white/20 backdrop-blur-md p-4 rounded-2xl transition-all flex items-center gap-3 border border-white/10 group z-20"
+                      >
+                        <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                        <span className="kurdish-text font-black text-lg">زڤڕین</span>
                       </button>
-                      <div className="flex items-center gap-2 text-xs font-medium text-stone-400">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                        <span>Powered by Gemini AI</span>
+
+                      <div className="text-center relative z-10">
+                        <motion.div
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="inline-block bg-[#f1c40f] text-[#2c3e50] px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-6 shadow-lg"
+                        >
+                          {GRAMMAR_TOPICS.find(t => t.id === selectedGrammarId)?.category}
+                        </motion.div>
+                        <h2 className="text-4xl md:text-5xl font-black kurdish-text mb-4 drop-shadow-lg">
+                          {GRAMMAR_TOPICS.find(t => t.id === selectedGrammarId)?.titleKurdish}
+                        </h2>
+                        <p className="text-stone-400 text-xl font-mono tracking-widest uppercase opacity-80">
+                          {GRAMMAR_TOPICS.find(t => t.id === selectedGrammarId)?.title}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-8 md:p-16 space-y-24">
+                      {GRAMMAR_TOPICS.find(t => t.id === selectedGrammarId)?.content.map((section, idx) => (
+                        <motion.div 
+                          key={idx}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          className="relative"
+                        >
+                          <div className="flex items-center gap-6 mb-10">
+                            <div className="w-16 h-16 bg-gradient-to-br from-[#f1c40f] to-[#f39c12] rounded-2xl flex items-center justify-center text-[#2c3e50] text-3xl font-black shadow-xl transform -rotate-6 border-4 border-white">
+                              {idx + 1}
+                            </div>
+                            <h3 className="text-4xl font-black text-stone-800 kurdish-text relative">
+                              {section.rule}
+                              <div className="absolute -bottom-3 right-0 w-full h-2 bg-[#f1c40f]/20 rounded-full" />
+                            </h3>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                            {/* Left Column: Explanation & Structure */}
+                            <div className="xl:col-span-7 space-y-8">
+                              <div className="bg-stone-50 p-8 rounded-[2.5rem] border-r-[12px] border-r-[#2c3e50] shadow-inner">
+                                <p className="text-lg text-stone-700 leading-relaxed kurdish-text font-medium">
+                                  {section.explanation}
+                                </p>
+                              </div>
+
+                              {section.structure && (
+                                <div className="bg-[#2c3e50] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                                    <Zap size={60} />
+                                  </div>
+                                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 mb-4 block kurdish-text">پێکهاتە (Structure)</span>
+                                  <p className="text-3xl md:text-4xl font-black english-text tracking-tight text-[#f1c40f]">
+                                    {section.structure}
+                                  </p>
+                                </div>
+                              )}
+
+                              {section.notes && section.notes.length > 0 && (
+                                <div className="bg-amber-50/50 border-2 border-amber-100 p-8 rounded-[2.5rem] space-y-4">
+                                  <div className="flex items-center gap-2 text-amber-600 mb-2">
+                                    <Info size={20} />
+                                    <span className="font-black kurdish-text text-lg">تێبینیێن گرنگ (Notes)</span>
+                                  </div>
+                                  <ul className="space-y-3">
+                                    {section.notes.map((note, nIdx) => (
+                                      <li key={nIdx} className="flex items-start gap-3 text-stone-600 kurdish-text text-sm leading-relaxed">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
+                                        {note}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Right Column: Examples */}
+                            <div className="xl:col-span-5 space-y-6">
+                              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 mb-4 block kurdish-text text-center">نموونە (Examples)</span>
+                              <div className="space-y-4">
+                                {section.examples.map((ex, exIdx) => (
+                                  <motion.div 
+                                    key={exIdx}
+                                    whileHover={{ scale: 1.02, x: -5 }}
+                                    className="bg-white border-2 border-stone-50 p-8 rounded-[2rem] shadow-sm hover:shadow-xl hover:border-[#2c3e50]/10 transition-all relative group"
+                                  >
+                                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <div className="bg-emerald-50 p-2 rounded-lg">
+                                        <CheckCircle2 size={16} className="text-emerald-500" />
+                                      </div>
+                                    </div>
+                                    <div className="space-y-3">
+                                      <p className="text-3xl font-black text-[#2c3e50] english-text leading-tight">{ex.en}</p>
+                                      <p className="text-base text-stone-400 kurdish-text font-bold pr-4 border-r-2 border-stone-100">
+                                        {ex.ku}
+                                      </p>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                    
+                    {/* Footer Tip */}
+                    <div className="bg-stone-50 p-10 text-center border-t border-stone-100">
+                      <div className="inline-flex items-center gap-3 text-[#2c3e50] bg-white px-8 py-4 rounded-2xl shadow-sm border border-stone-200">
+                        <Zap size={20} className="text-[#f1c40f]" />
+                        <span className="kurdish-text font-bold text-lg">بەردەوام بە ل سەر فێربوونێ! تو دێ ب سەرکەڤی.</span>
                       </div>
                     </div>
                   </div>
-
-                  <AnimatePresence>
-                    {showSetupHelp && (
+                )}
+              </motion.div>
+            ) : viewMode === 'stories' ? (
+              <motion.div
+                key="stories-view"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                {!selectedStoryId ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {STORIES.map((story) => (
                       <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="bg-blue-50 border-b border-blue-100 overflow-hidden"
+                        key={story.id}
+                        whileHover={{ y: -5, scale: 1.02 }}
+                        onClick={() => setSelectedStoryId(story.id)}
+                        className="bg-white p-6 rounded-3xl shadow-lg border border-stone-100 cursor-pointer group transition-all"
                       >
-                        <div className="p-6 space-y-4">
-                          <div className="flex items-center gap-2 text-blue-700 font-bold">
-                            <Settings size={18} />
-                            <span className="kurdish-text">چەوانیا کارپێکرنا وەرگێڕانێ ل نێت لیفای (Netlify)</span>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-                            <div className="space-y-2">
-                              <p className="text-blue-800 font-medium kurdish-text">١. کلیلێ API وەرگرە:</p>
-                              <p className="text-blue-600 kurdish-text">سەرەدانا ai.google.dev بکە و کلیلەکێ (API Key) پەیدا بکە.</p>
-                            </div>
-                            <div className="space-y-2">
-                              <p className="text-blue-800 font-medium kurdish-text">٢. ل نێت لیفای زێدە بکە:</p>
-                              <p className="text-blue-600 kurdish-text">د بەشێ Site configuration &gt; Environment variables دا پەیڤا GEMINI_API_KEY زێدە بکە و کلیلێ خۆ ل وێرێ دابنە.</p>
-                            </div>
-                          </div>
-                          <div className="bg-white/50 p-3 rounded-xl border border-blue-100 text-xs text-blue-500 font-mono">
-                            Key: GEMINI_API_KEY | Value: (Your API Key)
-                          </div>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="px-3 py-1 bg-[#2c3e50]/10 text-[#2c3e50] rounded-full text-xs font-bold uppercase tracking-wider">
+                            Level {story.level}
+                          </span>
+                          <BookOpen className="text-stone-300 group-hover:text-[#2c3e50] transition-colors" size={20} />
+                        </div>
+                        <h3 className="text-xl font-black text-[#2c3e50] mb-2 group-hover:text-[#e67e22] transition-colors">{story.title}</h3>
+                        <p className="text-stone-500 kurdish-text font-bold mb-4">{story.titleKurdish}</p>
+                        <div className="flex items-center text-stone-400 text-sm gap-2">
+                          <HelpCircle size={16} />
+                          <span className="kurdish-text">{story.questions.length} پسیار</span>
                         </div>
                       </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-stone-100">
-                    {/* Input Section (English) */}
-                    <div className="p-8 space-y-4 flex flex-col">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm border border-stone-200">
-                            <img 
-                              src="https://flagcdn.com/w80/gb.png" 
-                              alt="UK Flag" 
-                              className="w-full h-full object-cover" 
-                            />
-                          </div>
-                          <span className="font-bold text-stone-600 uppercase tracking-widest text-xs">
-                            English
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className={`text-[10px] font-mono font-medium px-2 py-1 rounded-full ${translatorInput.length > 4500 ? 'bg-rose-50 text-rose-500' : 'bg-stone-100 text-stone-400'}`}>
-                            {translatorInput.length} / 5000
-                          </span>
-                          {translatorInput && (
-                            <button 
-                              onClick={() => setTranslatorInput('')}
-                              className="p-1.5 text-stone-400 hover:text-rose-500 hover:bg-rose-50 rounded-full transition-colors"
-                              title="Clear Text"
-                            >
-                              <X size={14} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="relative flex-grow">
-                        <textarea
-                          value={translatorInput}
-                          onChange={(e) => setTranslatorInput(e.target.value.slice(0, 5000))}
-                          placeholder="Type or paste English text here..."
-                          className="w-full h-80 p-0 bg-transparent border-none focus:ring-0 text-xl text-stone-800 placeholder-stone-300 resize-none leading-relaxed"
-                        />
-                        {translatorInput && (
-                          <div className="absolute bottom-0 right-0 flex gap-2">
-                            <button
-                              onClick={() => playAudio(translatorInput, 'translator-input')}
-                              className={`p-3 rounded-full transition-all ${playingAudio === 'translator-input' ? 'bg-blue-500 text-white shadow-lg shadow-blue-200' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-stone-600'}`}
-                              title="Listen to Input"
-                            >
-                              <Volume2 size={18} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Output Section (Kurdish) */}
-                    <div className="p-8 space-y-4 bg-stone-50/30 flex flex-col">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm border border-stone-200">
-                            <img 
-                              src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Flag_of_Kurdistan.svg/1200px-Flag_of_Kurdistan.svg.png" 
-                              alt="Kurdistan Flag" 
-                              className="w-full h-full object-cover" 
-                            />
-                          </div>
-                          <span className="font-bold text-stone-600 uppercase tracking-widest text-xs kurdish-text">
-                            کوردی (بادینی)
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          {translatorOutput && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(translatorOutput);
-                                }}
-                                className="p-3 bg-white text-stone-400 rounded-full shadow-sm border border-stone-100 hover:text-blue-500 hover:border-blue-100 transition-all"
-                                title="Copy Translation"
-                              >
-                                <Copy size={18} />
-                              </button>
-                              <button
-                                onClick={() => playAudio(translatorOutput, 'translator-output')}
-                                className={`p-3 rounded-full transition-all shadow-sm border ${playingAudio === 'translator-output' ? 'bg-[#e67e22] text-white border-[#e67e22] shadow-lg shadow-orange-200' : 'bg-white text-stone-400 border-stone-100 hover:text-[#e67e22] hover:border-orange-100'}`}
-                                title="Listen to Translation"
-                              >
-                                <Volume2 size={18} />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex-grow min-h-[20rem]">
-                        {isTranslating ? (
-                          <div className="flex flex-col items-center justify-center h-full gap-4">
-                            <div className="relative">
-                              <div className="w-12 h-12 border-4 border-blue-100 rounded-full" />
-                              <div className="absolute top-0 left-0 w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                            </div>
-                            <span className="font-bold text-blue-500 kurdish-text animate-pulse">لێگەریان دکەت...</span>
-                          </div>
-                        ) : translationError ? (
-                          <div className="bg-rose-50 p-4 rounded-2xl border border-rose-100 text-rose-500 font-medium text-center kurdish-text">
-                            {translationError}
-                          </div>
-                        ) : translatorOutput ? (
-                          <div className="text-xl text-stone-800 leading-loose whitespace-pre-wrap kurdish-text">
-                            {translatorOutput}
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-full text-stone-300 space-y-2">
-                            <Languages size={48} strokeWidth={1} className="opacity-20" />
-                            <span className="italic kurdish-text">وەرگێڕان لێرە دێ دیار بیت...</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    ))}
                   </div>
-
-                  {/* Footer Action */}
-                  <div className="p-6 bg-white border-t border-stone-50 flex justify-center">
-                    <button
-                      onClick={async () => {
-                        if (!translatorInput.trim() || isTranslating) return;
-                        setIsTranslating(true);
-                        setTranslationError(null);
-                        try {
-                          const result = await translateText(translatorInput, 'en', 'ku');
-                          setTranslatorOutput(result);
-                        } catch (err: any) {
-                          if (err.message === "MISSING_API_KEY") {
-                            setTranslationError('ئاریشە: کلیلێ API یێ Gemini نەهاتیە دیتن. هیڤیە ل نێت لیفای (Netlify) د بەشێ Environment Variables دا پەیڤا GEMINI_API_KEY زێدە بکە.');
-                          } else {
-                            setTranslationError('ببورە، ئاریشەیەک هەبوو د وەرگێڕانێ دا. هیڤیە جارەکا دی هەول بدە.');
-                          }
-                        } finally {
-                          setIsTranslating(false);
-                        }
+                ) : (
+                  <div className="max-w-4xl mx-auto">
+                    <button 
+                      onClick={() => {
+                        setSelectedStoryId(null);
+                        setShowStoryResults(false);
+                        setStoryQuizAnswers({});
                       }}
-                      disabled={!translatorInput.trim() || isTranslating}
-                      className={`
-                        px-16 py-4 rounded-full font-bold text-xl shadow-xl transition-all flex items-center gap-3
-                        ${!translatorInput.trim() || isTranslating 
-                          ? 'bg-stone-200 text-stone-400 cursor-not-allowed' 
-                          : 'bg-[#2c3e50] text-white hover:bg-[#34495e] hover:scale-105 active:scale-95'}
-                      `}
+                      className="flex items-center gap-2 text-stone-500 hover:text-[#2c3e50] mb-8 transition-colors kurdish-text font-bold"
                     >
-                      <Languages size={24} />
-                      <span className="kurdish-text">وەرگێڕان (Translate)</span>
+                      <ChevronLeft size={20} />
+                      زڤڕین بو لیستا چیرۆکا
                     </button>
-                  </div>
-                </div>
 
-                <div className="bg-amber-50 p-6 rounded-2xl border border-amber-100 flex items-start gap-4">
-                  <Info className="text-amber-500 shrink-0 mt-1" size={20} />
-                  <p className="text-amber-800 text-sm kurdish-text leading-relaxed">
-                    ژ بوو وەرگێڕانا هەر پەیڤەکێ توو دشێی وەرگێڕانێ بکەی ل ڤێرێ❗
-                  </p>
-                </div>
+                    {STORIES.find(s => s.id === selectedStoryId) && (
+                      <div className="space-y-12">
+                        {/* Story Content */}
+                        <div className="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-stone-100 relative overflow-hidden">
+                          <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#2c3e50] to-[#e67e22]" />
+                          <div className="mb-10 text-center">
+                            <h2 className="text-3xl md:text-5xl font-black text-[#2c3e50] mb-4">
+                              {STORIES.find(s => s.id === selectedStoryId)?.title}
+                            </h2>
+                            <h3 className="text-2xl md:text-3xl font-bold text-[#e67e22] kurdish-text">
+                              {STORIES.find(s => s.id === selectedStoryId)?.titleKurdish}
+                            </h3>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                            <div className="space-y-6">
+                              <div className="flex items-center gap-2 text-[#2c3e50] font-bold uppercase tracking-widest text-xs mb-4">
+                                <Languages size={16} />
+                                English Text
+                              </div>
+                              <p className="text-xl leading-relaxed text-stone-800 english-text first-letter:text-5xl first-letter:font-black first-letter:mr-3 first-letter:float-left">
+                                {STORIES.find(s => s.id === selectedStoryId)?.content}
+                              </p>
+                              <button 
+                                onClick={() => playAudio(STORIES.find(s => s.id === selectedStoryId)?.content || '', `story-${selectedStoryId}`)}
+                                className={`flex items-center gap-2 px-6 py-3 rounded-2xl transition-all font-bold ${playingAudio === `story-${selectedStoryId}` ? 'bg-[#e67e22] text-white shadow-lg' : 'bg-stone-50 text-[#2c3e50] hover:bg-stone-100 border border-stone-200'}`}
+                              >
+                                {playingAudio === `story-${selectedStoryId}` ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                                <span className="kurdish-text">گوه لێ ببە</span>
+                              </button>
+                            </div>
+                            <div className="space-y-6 bg-stone-50/50 p-6 rounded-3xl border border-stone-100">
+                              <div className="flex items-center gap-2 text-stone-400 font-bold uppercase tracking-widest text-xs mb-4">
+                                <Languages size={16} />
+                                وەرگێڕانا بادینی
+                              </div>
+                              <p className="text-xl leading-relaxed text-stone-700 kurdish-text">
+                                {STORIES.find(s => s.id === selectedStoryId)?.contentKurdish}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Quiz Section */}
+                        <div className="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-stone-100">
+                          <div className="flex items-center gap-4 mb-12">
+                            <div className="p-4 bg-[#2c3e50] text-white rounded-2xl">
+                              <BrainCircuit size={32} />
+                            </div>
+                            <div>
+                              <h3 className="text-2xl font-black text-[#2c3e50] kurdish-text">تاقیکردنەوەیا چیرۆکێ</h3>
+                              <p className="text-stone-500 kurdish-text">بەرسڤا پسیارێن ل خوارێ بدە</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-12">
+                            {STORIES.find(s => s.id === selectedStoryId)?.questions.map((q, qIdx) => (
+                              <div key={q.id} className="space-y-6">
+                                <div className="flex items-start gap-4">
+                                  <span className="w-8 h-8 bg-stone-100 text-stone-500 rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0 mt-1">
+                                    {qIdx + 1}
+                                  </span>
+                                  <h4 className="text-xl font-bold text-[#2c3e50]">{q.question}</h4>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-12">
+                                  {q.options.map((option, oIdx) => (
+                                    <button
+                                      key={oIdx}
+                                      disabled={showStoryResults}
+                                      onClick={() => setStoryQuizAnswers(prev => ({ ...prev, [q.id]: oIdx }))}
+                                      className={`
+                                        p-4 rounded-2xl border-2 transition-all text-left font-medium relative overflow-hidden
+                                        ${storyQuizAnswers[q.id] === oIdx 
+                                          ? 'border-[#2c3e50] bg-[#2c3e50]/5 text-[#2c3e50]' 
+                                          : 'border-stone-100 hover:border-stone-200 text-stone-600'}
+                                        ${showStoryResults && q.correctAnswer === oIdx ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : ''}
+                                        ${showStoryResults && storyQuizAnswers[q.id] === oIdx && q.correctAnswer !== oIdx ? 'border-rose-500 bg-rose-50 text-rose-700' : ''}
+                                      `}
+                                    >
+                                      {option}
+                                      {showStoryResults && q.correctAnswer === oIdx && (
+                                        <CheckCircle2 className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500" size={20} />
+                                      )}
+                                      {showStoryResults && storyQuizAnswers[q.id] === oIdx && q.correctAnswer !== oIdx && (
+                                        <AlertCircle className="absolute right-4 top-1/2 -translate-y-1/2 text-rose-500" size={20} />
+                                      )}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {!showStoryResults ? (
+                            <div className="mt-12 text-center">
+                              <button 
+                                onClick={() => setShowStoryResults(true)}
+                                disabled={Object.keys(storyQuizAnswers).length < (STORIES.find(s => s.id === selectedStoryId)?.questions.length || 0)}
+                                className="px-12 py-4 bg-[#2c3e50] text-white rounded-2xl font-bold text-lg hover:bg-[#34495e] transition-all shadow-xl disabled:opacity-50 disabled:cursor-not-allowed kurdish-text"
+                              >
+                                دیتنا ئەنجامان
+                              </button>
+                              {Object.keys(storyQuizAnswers).length < (STORIES.find(s => s.id === selectedStoryId)?.questions.length || 0) && (
+                                <p className="mt-4 text-stone-400 text-sm kurdish-text">هیڤیە بەرسڤا هەمی پسیاران بدە</p>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="mt-12 p-8 bg-stone-50 rounded-3xl border border-stone-100 text-center">
+                              <h4 className="text-2xl font-black text-[#2c3e50] mb-4 kurdish-text">ئەنجامێ تە</h4>
+                              <div className="text-5xl font-black text-[#e67e22] mb-6">
+                                {Object.entries(storyQuizAnswers).filter(([qId, ansIdx]) => {
+                                  const q = STORIES.find(s => s.id === selectedStoryId)?.questions.find(quest => quest.id === qId);
+                                  return q?.correctAnswer === ansIdx;
+                                }).length} / {STORIES.find(s => s.id === selectedStoryId)?.questions.length}
+                              </div>
+                              <button 
+                                onClick={() => {
+                                  setShowStoryResults(false);
+                                  setStoryQuizAnswers({});
+                                }}
+                                className="px-8 py-3 bg-white border-2 border-stone-200 text-stone-600 rounded-2xl font-bold hover:bg-stone-50 transition-all kurdish-text"
+                              >
+                                دووبارەکرن
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </motion.div>
             ) : viewMode === 'phrasal' ? (
               <motion.div
@@ -771,8 +1019,8 @@ export default function App() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {PHRASAL_VERBS.filter(pv => 
-                    pv.verb.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    pv.meaningKurdish.includes(searchTerm)
+                    pv.verb.toLowerCase().includes(globalSearchTerm.toLowerCase()) || 
+                    pv.meaningKurdish.includes(globalSearchTerm)
                   ).map((pv) => (
                     <motion.div
                       key={pv.id}
@@ -782,17 +1030,28 @@ export default function App() {
                       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#f1c40f]/10 to-transparent rounded-bl-full -mr-10 -mt-10 transition-all group-hover:scale-110" />
                       <div className="flex justify-between items-start mb-6">
                         <div>
-                          <span className="inline-block px-3 py-1 bg-[#f1c40f]/10 text-[#d4ac0d] text-[10px] font-black uppercase tracking-widest rounded-full mb-2">Phrasal Verb</span>
                           <div className="flex items-center gap-2">
                             <h3 className="text-2xl font-black text-[#2c3e50]">{pv.verb}</h3>
+                            <button 
+                              onClick={() => playAudio(pv.verb, `verb-${pv.id}`)}
+                              title="Play Verb"
+                              className={`p-2 rounded-full transition-all flex items-center gap-1 ${playingAudio === `verb-${pv.id}` ? 'bg-[#e67e22] text-white' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-[#e67e22]'}`}
+                            >
+                              {playingAudio === `verb-${pv.id}` ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                              <span className="text-[10px] font-bold kurdish-text">پەیڤ</span>
+                            </button>
                           </div>
                         </div>
-                        <button 
-                          onClick={() => playAudio(`${pv.verb}. ${pv.example}`, pv.id)}
-                          className={`p-4 rounded-2xl transition-all ${playingAudio === pv.id ? 'bg-[#e67e22] text-white shadow-lg scale-110' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-[#2c3e50]'}`}
-                        >
-                          <Volume2 size={24} />
-                        </button>
+                        <div className="flex flex-col gap-2">
+                          <button 
+                            onClick={() => playAudio(`${pv.verb}. ${pv.example}`, `${pv.id}-example`)}
+                            className={`p-3 rounded-xl transition-all flex items-center gap-2 ${playingAudio === `${pv.id}-example` ? 'bg-[#2c3e50] text-white shadow-lg' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-[#2c3e50]'}`}
+                            title="Play Example"
+                          >
+                            {playingAudio === `${pv.id}-example` ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                            <span className="text-[10px] font-bold kurdish-text">رستە</span>
+                          </button>
+                        </div>
                       </div>
                       <p className="text-stone-500 mb-4 italic">"{pv.meaning}"</p>
                       <div className="bg-stone-50 p-4 rounded-2xl mb-4 border-r-4 border-[#f1c40f]">
@@ -818,8 +1077,8 @@ export default function App() {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {IDIOMS.filter(idiom => 
-                    idiom.phrase.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                    idiom.meaningKurdish.includes(searchTerm)
+                    idiom.phrase.toLowerCase().includes(globalSearchTerm.toLowerCase()) || 
+                    idiom.meaningKurdish.includes(globalSearchTerm)
                   ).map((idiom) => (
                     <motion.div
                       key={idiom.id}
@@ -829,17 +1088,28 @@ export default function App() {
                       <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-[#8e44ad] to-[#9b59b6] opacity-20" />
                       <div className="flex justify-between items-start mb-6">
                         <div>
-                          <span className="inline-block px-3 py-1 bg-[#8e44ad]/10 text-[#8e44ad] text-[10px] font-black uppercase tracking-widest rounded-full mb-2">Idiom (ئیدیۆم)</span>
                           <div className="flex items-center gap-2">
                             <h3 className="text-2xl font-black text-[#8e44ad]">{idiom.phrase}</h3>
+                            <button 
+                              onClick={() => playAudio(idiom.phrase, `phrase-${idiom.id}`)}
+                              title="Play Phrase"
+                              className={`p-2 rounded-full transition-all flex items-center gap-1 ${playingAudio === `phrase-${idiom.id}` ? 'bg-[#8e44ad] text-white' : 'text-stone-400 hover:bg-stone-100 hover:text-[#8e44ad]'}`}
+                            >
+                              {playingAudio === `phrase-${idiom.id}` ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                              <span className="text-[10px] font-bold kurdish-text">پەیڤ</span>
+                            </button>
                           </div>
                         </div>
-                        <button 
-                          onClick={() => playAudio(`${idiom.phrase}. ${idiom.example}`, idiom.id)}
-                          className={`p-4 rounded-2xl transition-all ${playingAudio === idiom.id ? 'bg-[#8e44ad] text-white shadow-lg scale-110' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-[#8e44ad]'}`}
-                        >
-                          <Volume2 size={24} />
-                        </button>
+                        <div className="flex flex-col gap-2">
+                          <button 
+                            onClick={() => playAudio(`${idiom.phrase}. ${idiom.example}`, `${idiom.id}-example`)}
+                            className={`p-3 rounded-xl transition-all flex items-center gap-2 ${playingAudio === `${idiom.id}-example` ? 'bg-[#2c3e50] text-white shadow-lg' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-[#2c3e50]'}`}
+                            title="Play Example"
+                          >
+                            {playingAudio === `${idiom.id}-example` ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                            <span className="text-[10px] font-bold kurdish-text">رستە</span>
+                          </button>
+                        </div>
                       </div>
                       <p className="text-stone-500 mb-4 italic">"{idiom.meaning}"</p>
                       <div className="bg-purple-50 p-4 rounded-2xl mb-4 border-l-4 border-[#8e44ad]">
@@ -920,12 +1190,15 @@ export default function App() {
                         {quizType === 'wordToMeaning' ? (
                           <div className="flex flex-col items-center gap-4">
                             <span className="english-text">{quizQuestion.word}</span>
-                            <button 
-                              onClick={() => playAudio(quizQuestion.word)}
-                              className={`p-4 rounded-2xl transition-all ${playingAudio === quizQuestion.word ? 'bg-[#e67e22] text-white animate-pulse' : 'bg-white/10 text-[#2c3e50] hover:bg-white/20 border border-stone-200'}`}
-                            >
-                              <Volume2 size={32} />
-                            </button>
+                            <div className="flex bg-white/10 p-2 rounded-2xl gap-4 border border-stone-200">
+                              <button 
+                                onClick={() => playAudio(quizQuestion.word, `quiz-${quizQuestion.id}`)}
+                                className={`p-4 rounded-2xl transition-all flex flex-col items-center gap-1 ${playingAudio === `quiz-${quizQuestion.id}` ? 'bg-[#e67e22] text-white' : 'bg-white text-[#2c3e50] hover:bg-stone-50 border border-stone-200'}`}
+                              >
+                                {playingAudio === `quiz-${quizQuestion.id}` ? <VolumeX size={32} /> : <Volume2 size={32} />}
+                                <span className="text-[12px] font-bold kurdish-text">گوه لێ ببە</span>
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <span className="kurdish-text">{quizQuestion.meaning}</span>
@@ -967,6 +1240,90 @@ export default function App() {
                   </div>
                 )}
               </motion.div>
+            ) : viewMode === 'saved' ? (
+              <motion.div
+                key="saved-view"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                <div className="bg-amber-50 border-2 border-amber-100 p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 bg-amber-500 text-white rounded-2xl shadow-lg">
+                      <BookmarkCheck size={32} />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-amber-900 kurdish-text">پەیڤێن خەزنکری</h3>
+                      <p className="text-amber-700 kurdish-text">تە {bookmarkedWordsList.length} پەیڤ خەزنکرینە</p>
+                    </div>
+                  </div>
+                  {bookmarkedWordsList.length > 0 && (
+                    <button 
+                      onClick={() => {
+                        if (confirm('ئەرێ تو یێ پشت راستی دێ هەمی پەیڤێن خەزنکری ژێبەی؟')) {
+                          setBookmarkedWords(new Set());
+                        }
+                      }}
+                      className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-amber-200 text-amber-600 rounded-2xl hover:bg-amber-100 transition-all font-bold kurdish-text"
+                    >
+                      <Trash2 size={18} />
+                      هەمییان ژێببە
+                    </button>
+                  )}
+                </div>
+
+                {bookmarkedWordsList.length === 0 ? (
+                  <div className="bg-white p-20 rounded-[3rem] border-2 border-dashed border-stone-200 text-center">
+                    <div className="w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Bookmark size={48} className="text-stone-300" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-stone-400 kurdish-text mb-2">چ پەیڤ نەهاتینە خەزنکرن</h3>
+                    <p className="text-stone-400 kurdish-text">ل پەیڤان بگەڕە و نیشانا خەزنکرنێ کلیک بکە</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {displayedWords.map((word, index) => (
+                      <motion.div 
+                        key={`${word.id}-${index}`}
+                        whileHover={{ y: -5 }}
+                        className="bg-white p-6 rounded-2xl shadow-lg border border-stone-100 border-r-8 border-r-amber-500 hover:shadow-xl transition-all"
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[#2c3e50] font-bold text-2xl english-text">{word.word}</span>
+                              <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] font-bold rounded-md border border-stone-200">
+                                ئاستێ {word.level}
+                              </span>
+                              <button 
+                                onClick={() => playAudio(word.word, `saved-word-${index}`)}
+                                className={`p-1.5 rounded-lg transition-all ${playingAudio === `saved-word-${index}` ? 'bg-amber-500 text-white' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-amber-500'}`}
+                              >
+                                {playingAudio === `saved-word-${index}` ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                              </button>
+                            </div>
+                            <span className="text-stone-400 text-sm font-medium kurdish-text">{word.pronunciation}</span>
+                          </div>
+                          <button 
+                            onClick={() => toggleBookmark(word.word)}
+                            className="p-2 rounded-full bg-amber-50 text-amber-500 hover:bg-amber-100 transition-all"
+                          >
+                            <BookmarkCheck size={18} />
+                          </button>
+                        </div>
+                        <div className="space-y-3">
+                          <p className="text-[#2c3e50] font-bold kurdish-text text-lg">{word.meaning}</p>
+                          <div className="p-3 bg-stone-50 rounded-xl border-r-4 border-amber-200">
+                            <p className="text-stone-600 text-sm italic mb-1">"{word.exampleEnglish}"</p>
+                            <p className="text-stone-500 text-xs kurdish-text">{word.exampleKurdish}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
             ) : (
               <motion.div
                 key="list-view"
@@ -975,7 +1332,7 @@ export default function App() {
                 exit={{ opacity: 0, y: -20 }}
                 className="space-y-4"
               >
-                {!searchTerm && (
+                {!globalSearchTerm && (
                   <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -990,7 +1347,7 @@ export default function App() {
                       </p>
                       <div className="w-20 h-1 bg-stone-100 mx-auto mb-6" />
                       <p className="text-xl text-stone-500 kurdish-text leading-relaxed">
-                        مالپەرێ مە ل دەف خو بەلاڤ بکەن ژ بوو گەهاندنا مافی بوو گشت کەساسنێن حەزا فێربوونا زمانێ ئنگلیزی هەی.
+                        مالپەرێ مە ل دەف خو بەلاڤ بکەن ژ بوو گەهاندنا مافی بوو گشت کەسانێن حەزا فێربوونا زمانێ ئنگلیزی هەی.
                       </p>
                     </div>
                   </motion.div>
@@ -1000,7 +1357,7 @@ export default function App() {
                   <div className="flex items-center gap-3">
                     <GraduationCap size={32} className="text-[#f1c40f]" />
                     <span className="text-xl font-bold kurdish-text">
-                      {searchTerm 
+                      {globalSearchTerm 
                         ? `ئەنجامێن لێگەریانێ: ${filteredWords.length} پەیڤ هاتنە دیتن`
                         : `ئاستێ ${activeLevel} - ${
                             activeLevel === 'A1' ? `Starter - ${currentLevelWords.length} پەیڤێن سەرەتایی` : 
@@ -1026,16 +1383,48 @@ export default function App() {
                       >
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex flex-col gap-1">
-                            <span className="text-[#2c3e50] font-bold text-2xl english-text">{index + 1}. {word.word}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[#2c3e50] font-bold text-2xl english-text">{index + 1}. {word.word}</span>
+                              {globalSearchTerm && (
+                                <span className="px-2 py-0.5 bg-stone-100 text-stone-500 text-[10px] font-bold rounded-md border border-stone-200">
+                                  ئاستێ {word.level}
+                                </span>
+                              )}
+                              <button 
+                                onClick={() => playAudio(word.word, `word-${index}`)}
+                                title="Play Word Only"
+                                className={`p-1.5 rounded-lg transition-all ${playingAudio === `word-${index}` ? 'bg-[#e67e22] text-white' : 'bg-stone-50 text-stone-400 hover:bg-stone-100 hover:text-[#e67e22]'}`}
+                              >
+                                {playingAudio === `word-${index}` ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                              </button>
+                            </div>
                             <span className="text-stone-400 text-sm font-medium kurdish-text">{word.pronunciation}</span>
                           </div>
-                          <button 
-                            onClick={() => playAudio(`${word.word}. ${word.exampleEnglish}`, `full-${index}`)}
-                            title="Play Word & Example"
-                            className={`p-3 rounded-xl transition-all ${playingAudio === `full-${index}` ? 'bg-[#e67e22] text-white animate-pulse' : 'bg-stone-100 text-[#e67e22] hover:bg-stone-200'}`}
-                          >
-                            <Volume2 size={20} />
-                          </button>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                              <button 
+                                onClick={() => toggleBookmark(word.word)}
+                                className={`p-2 rounded-full transition-all ${bookmarkedWords.has(word.word.toLowerCase()) ? 'bg-amber-50 text-amber-500' : 'bg-stone-50 text-stone-400 hover:bg-stone-100'}`}
+                                title={bookmarkedWords.has(word.word.toLowerCase()) ? "Remove Bookmark" : "Add Bookmark"}
+                              >
+                                {bookmarkedWords.has(word.word.toLowerCase()) ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+                              </button>
+                              <button 
+                                onClick={() => toggleLearned(word.word)}
+                                className={`p-2 rounded-full transition-all ${learnedWords.has(word.word) ? 'bg-emerald-50 text-emerald-600' : 'bg-stone-50 text-stone-400 hover:bg-stone-100'}`}
+                                title={learnedWords.has(word.word) ? "Mark as Unlearned" : "Mark as Learned"}
+                              >
+                                <CheckCircle2 size={18} />
+                              </button>
+                            </div>
+                            <button 
+                              onClick={() => playAudio(`${word.word}. ${word.exampleEnglish}`, `full-${index}`)}
+                              title="Play Word & Example"
+                              className={`p-3 rounded-xl transition-all ${playingAudio === `full-${index}` ? 'bg-[#e67e22] text-white' : 'bg-stone-100 text-[#e67e22] hover:bg-stone-200'}`}
+                            >
+                              {playingAudio === `full-${index}` ? <VolumeX size={20} /> : <Volume2 size={20} />}
+                            </button>
+                          </div>
                         </div>
                         
                         <div className="space-y-4">
@@ -1080,15 +1469,15 @@ export default function App() {
                   })}
                 </div>
 
-                {/* Load More Button */}
-                {hasMore && (
-                  <div className="flex justify-center mt-12 py-8">
-                    <button
+                {/* Load More */}
+                {viewMode === 'list' && hasMore && (
+                  <div className="mt-12 flex justify-center pb-20">
+                    <button 
                       onClick={loadMore}
-                      className="px-8 py-4 bg-[#2c3e50] text-white rounded-2xl font-bold shadow-lg hover:bg-[#34495e] transition-all flex items-center gap-2 group"
+                      className="px-10 py-4 bg-white border-2 border-stone-100 text-stone-600 rounded-2xl font-bold hover:border-[#2c3e50] hover:text-[#2c3e50] transition-all kurdish-text shadow-sm flex items-center gap-2"
                     >
                       <span>پتر ببینە (Load More)</span>
-                      <ChevronDown size={20} className="group-hover:translate-y-1 transition-transform" />
+                      <ChevronDown size={20} />
                     </button>
                   </div>
                 )}
@@ -1098,41 +1487,120 @@ export default function App() {
         </div>
       </main>
 
-      {/* Back to top button */}
-      <button 
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-8 right-8 bg-[#2c3e50] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all z-50"
-      >
-        <ChevronRight className="-rotate-90" />
-      </button>
+      {/* Profile Modal */}
+      <AnimatePresence>
+        {showProfileModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowProfileModal(false)}
+              className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden"
+            >
+              <div className="bg-[#2c3e50] p-8 text-white text-center relative">
+                <button 
+                  onClick={() => setShowProfileModal(false)}
+                  className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
+                >
+                  <X size={20} />
+                </button>
+                <div className="relative inline-block mb-4">
+                  <div className="w-24 h-24 rounded-full border-4 border-[#f1c40f] overflow-hidden bg-stone-100 group relative flex items-center justify-center text-stone-400">
+                    {tempProfile.imageUrl || profile?.imageUrl ? (
+                      <img 
+                        src={tempProfile.imageUrl || profile?.imageUrl || ""} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <UserRound size={48} />
+                    )}
+                    <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                      <Camera className="text-white" size={24} />
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setTempProfile(prev => ({ ...prev, imageUrl: reader.result as string }));
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+                <h3 className="text-2xl font-bold kurdish-text">پڕۆفایلێ تە</h3>
+                <p className="text-stone-400 text-sm kurdish-text">ناڤ و وێنەیێ خۆ دیار بکە</p>
+              </div>
+
+              <div className="p-8 space-y-6">
+                <div>
+                  <label className="block text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-2 kurdish-text">ناڤێ تە</label>
+                  <input 
+                    type="text" 
+                    placeholder="ناڤێ خۆ بنڤیسە..."
+                    value={tempProfile.name || (profile?.name || '')}
+                    onChange={(e) => setTempProfile(prev => ({ ...prev, name: e.target.value }))}
+                    className="w-full bg-stone-50 border-2 border-stone-100 rounded-2xl py-4 px-6 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#2c3e50] transition-all kurdish-text"
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <button 
+                    onClick={() => {
+                      if (tempProfile.name || profile?.name) {
+                        setProfile({
+                          name: tempProfile.name || profile?.name || 'User',
+                          imageUrl: tempProfile.imageUrl || profile?.imageUrl || ""
+                        });
+                        setShowProfileModal(false);
+                      }
+                    }}
+                    className="flex-1 bg-[#2c3e50] text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-[#34495e] transition-all flex items-center justify-center gap-2 kurdish-text"
+                  >
+                    <Save size={20} />
+                    پاشکەفتن
+                  </button>
+                  {profile && (
+                    <button 
+                      onClick={() => {
+                        setProfile(null);
+                        setShowProfileModal(false);
+                      }}
+                      className="bg-red-50 text-red-500 px-6 py-4 rounded-2xl font-bold hover:bg-red-100 transition-all kurdish-text"
+                    >
+                      دەرکەفتن
+                    </button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Footer */}
       <footer className="bg-[#2c3e50] text-white py-12 mt-12 text-center">
         <div className="max-w-5xl mx-auto px-4">
-          <p className="text-stone-300 text-sm mb-6 font-mono">2026 @ دیـــنـــدار الـــــکـــــردی</p>
-          
-          <div className="bg-white/5 p-8 rounded-2xl border border-white/10 mb-8">
-            <p className="kurdish-text text-xl mb-6 text-[#f1c40f] font-bold">
-              ئەگەر هەر پرسیارەک یان ئاریشەیەک هەبوو
-            </p>
-            <div className="flex justify-center">
-              <a 
-                href="https://t.me/dindarkrd" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 bg-[#0088cc] hover:bg-[#0077b5] text-white px-8 py-4 rounded-2xl transition-all shadow-xl hover:scale-105 active:scale-95"
-              >
-                <Send size={24} />
-                <span className="kurdish-text text-xl font-bold">پەیوەندی ب من بکە ل تیلیگرامی</span>
-              </a>
-            </div>
-          </div>
-
-          <p className="text-[#bdc3c7] kurdish-text text-lg">
-            هیڤی دکەین ئەڤی مالپەری بەلاڤ بکەن دا هەمی مفای ژێ وەربگرن.
-          </p>
+          <p className="text-stone-300 text-sm mb-2 font-mono">2026 @ دیـــنـــدار الـــــکـــــردی</p>
         </div>
       </footer>
+      {/* Social Links */}
+      <SocialLinks />
     </div>
   );
 }
