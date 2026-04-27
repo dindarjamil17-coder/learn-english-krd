@@ -30,6 +30,7 @@ import Chatbot from './components/Chatbot';
 import SocialLinks from './components/SocialLinks';
 import VideoTranslator from './components/VideoTranslator';
 import ConversationView from './components/ConversationView';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 const LEVELS: { id: Level; title: string; count: number }[] = [
   { id: 'A1', title: 'ئاستێ ئێکێ - ١٠٠٠ پەیڤ', count: 1000 },
@@ -1601,6 +1602,8 @@ export default function App() {
       </footer>
       {/* Social Links */}
       <SocialLinks />
+      {/* Vercel Speed Insights */}
+      <SpeedInsights />
     </div>
   );
 }
