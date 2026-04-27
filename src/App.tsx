@@ -16,6 +16,7 @@ import {
   ChevronRight, Bot, MessageSquare, MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Analytics } from '@vercel/analytics/react';
 import { WordEntry, Level, ViewMode, UserProfile, Story, StoryQuestion } from './types';
 import { 
   ALL_A1_WORDS, ALL_A2_WORDS, ALL_B1_WORDS, ALL_B2_WORDS, ALL_C1_WORDS, ALL_C2_WORDS 
@@ -1601,6 +1602,8 @@ export default function App() {
       </footer>
       {/* Social Links */}
       <SocialLinks />
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   );
 }
