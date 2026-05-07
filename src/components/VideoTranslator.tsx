@@ -6,7 +6,6 @@ import {
   AlertCircle, CheckCircle2, Languages,
   FileCode, PlayCircle, FileVideo, Eye
 } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
 
 export default function VideoTranslator() {
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -56,16 +55,6 @@ export default function VideoTranslator() {
     setTranslatedText('');
 
     try {
-      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
-                     (process.env.GEMINI_API_KEY as string) || 
-                     '';
-      
-      if (!apiKey) {
-        throw new Error('کلیلا وەرگێڕانێ (API Key) نەهاتیە دیتن.');
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-
       setProgress(30);
       const base64Data = await fileToBase64(videoFile);
       setProgress(50);
@@ -76,26 +65,36 @@ export default function VideoTranslator() {
         Do not include timestamps unless they are specifically requested.
         Use natural Badini Kurdish (e.g., use 'ئەز', 'دێ', 'من کر').`;
 
-      const result = await ai.models.generateContent({
-        model: "gemini-1.5-flash",
-        contents: [
-          {
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  mimeType: videoFile.type,
-                  data: base64Data,
+      const response = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType: videoFile.type,
+                    data: base64Data,
+                  },
                 },
-              },
-            ],
-          },
-        ],
+              ],
+            },
+          ],
+          model: "gemini-1.5-flash"
+        })
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Connection failed');
+      }
+
       setProgress(90);
-      const response = result.text;
-      setTranslatedText(response || '');
+      const data = await response.json();
+      setTranslatedText(data.text || '');
       setProgress(100);
       setIsFinished(true);
     } catch (err: any) {
