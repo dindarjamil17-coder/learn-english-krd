@@ -372,7 +372,7 @@ export default function App() {
               className="relative"
             >
               <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Flag_of_Kurdistan.svg/1200px-Flag_of_Kurdistan.svg.png" 
+                src="https://wallpapers.com/images/hd/kurdish_-flag_-grunge_-style-ii5gw90487tdmurd.jpg" 
                 alt="Kurdistan Flag" 
                 className="w-24 h-14 object-cover rounded-xl shadow-2xl border-2 border-white/20"
                 referrerPolicy="no-referrer"
@@ -384,7 +384,7 @@ export default function App() {
               className="relative"
             >
               <img 
-                src="https://static.vecteezy.com/system/resources/thumbnails/020/153/877/original/united-kingdom-flag-waving-in-wind-of-great-britain-and-northern-ireland-realistic-union-jack-flag-background-british-uk-flag-looping-closeup-1080p-full-hd-1920x1080-footage-united-kingdom-free-video.jpg" 
+                src="https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg" 
                 alt="UK Flag" 
                 className="w-24 h-14 object-cover rounded-xl shadow-2xl border-2 border-white/20"
                 referrerPolicy="no-referrer"

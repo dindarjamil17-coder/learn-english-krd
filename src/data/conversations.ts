@@ -13,7 +13,11 @@ export const conversations: Conversation[] = [
       { speaker: 'Saman', text: 'Nice to meet you too, Alan. Where are you from?', translation: 'ئەز ژی ب دیتنا تە کەیفخۆشم، ئالان. تو ژ کیدەرێی؟' },
       { speaker: 'Alan', text: 'I am from Duhok. And you?', translation: 'ئەز ژ دهۆکێم. پا تو؟' },
       { speaker: 'Saman', text: 'I am from Zakho. How old are you?', translation: 'ئەز ژ زاخۆم. تو چەند سالی؟' },
-      { speaker: 'Alan', text: 'I am 20 years old.', translation: 'ئەز ٢٠ سالم.' }
+      { speaker: 'Alan', text: 'I am 20 years old. What about you?', translation: 'ئەز ٢٠ سالم. پا تو؟' },
+      { speaker: 'Saman', text: 'I am 22. What do you do for fun?', translation: 'ئەز ٢٢ سالم. تو حەز ژ چی دکەی بۆ کەیفێ؟' },
+      { speaker: 'Alan', text: 'I like playing football and reading. Do you like sports?', translation: 'ئەز حەز ژ تەپەپێ و خواندنێ دکەم. ئەرێ تو حەز ژ وەرزشێ دکەی؟' },
+      { speaker: 'Saman', text: 'Yes, I love swimming. It is very healthy.', translation: 'بەلێ، ئەز حەز ژ مەلەفانیێ دکەم. یا زۆر ب مفا و ساخلەمە.' },
+      { speaker: 'Alan', text: 'That is great! Maybe we can go together one day.', translation: 'ئەفە زۆر باشە! رەنگە جارهەکێ ئەم پێکڤە بچین.' }
     ],
     vocabulary: [
       { word: 'Meeting', translation: 'دیدارکرن' },
@@ -1851,8 +1855,16 @@ export const conversations: Conversation[] = [
     dialogue: [
       { speaker: 'Hevi', text: 'We should visit Akre this weekend. The nature there is beautiful.', translation: 'پێتڤییە ئەڤێ دوماهیکا حەفتیێ بچینە ئاکرێ. سروشت ل وێرێ گەلەک یێ جوانە.' },
       { speaker: 'Zana', text: 'That sounds like a great idea. Should we go by car or bus?', translation: 'ئەفە هزرەکا زۆر باشە. ئەرێ ب ترۆمبێلێ بچین یان ب پاسێ؟' },
-      { speaker: 'Hevi', text: 'I think going by car is more convenient. We can stop whenever we want.', translation: 'ب هزرا من ب ترۆمبێلێ بچین چێترە. ئەم دشێین هەر دەمێ مە بڤێت بوەستین.' },
-      { speaker: 'Zana', text: 'I agree. Let\'s check the weather forecast first.', translation: 'ئەز دگەل تە مە. دێ بەری هەر تشتەکی تەماشەی سەقای کەین.' }
+      { speaker: 'Hevi', text: 'I think going by car is more convenient. We can stop whenever we want to take photos.', translation: 'ب هزرا من ب ترۆمبێلێ بچین چێترە. ئەم دشێین هەر دەمێ مە بڤێت بوەستین دا کو وێنەیان بگرین.' },
+      { speaker: 'Zana', text: 'I agree. Plus, the drive through the mountains is spectacular. Have you seen the new road?', translation: 'ئەز دگەل تە مە. زێدەباری ڤێ، رێکا د ناڤ چیایان را یا زۆر جوانە. تە رێکا نوو دیتییە؟' },
+      { speaker: 'Hevi', text: 'Not yet, but I heard it saves a lot of time. We should also pack some snacks.', translation: 'هێشتا نە، لێ من گۆهـ لێ بوویە گەلەک دەمی دپاریزیت. پێتڤییە ئەم هندەک سووکەخوارن ژی دگەل خۆ ببەین.' },
+      { speaker: 'Zana', text: 'Definitely. I will bring the sandwiches and some Kurdish tea. What time should we leave?', translation: 'بێگومان. ئەز دێ لەفان و هندەک چایا کوردی ئینم. دەمژمێر چەند ب رێ بکەڤین؟' },
+      { speaker: 'Hevi', text: 'Let\'s leave early Saturday morning, around 8 AM. This way we can enjoy the whole day.', translation: 'بلا سپێدەیا زوو یا شەمبیێ ب رێ بکەڤین، نێزیکی دەمژمێر ٨ێ سپێدێ. ب ڤی شێوەی ئەم دشێین هەمی رۆژی کەیفێ بکەین.' },
+      { speaker: 'Zana', text: 'Perfect. I will also bring my camera. Akre is famous for its historical charm.', translation: 'زۆر باشە. ئەز دێ کامیرەیا خۆ ژی ئینم. ئاکرێ یا ناڤدارە ب دیمەنێن خۆ یێن دیرۆکی یێن جوان.' },
+      { speaker: 'Hevi', text: 'And don\'t forget to charge the batteries! We don\'t want to miss any moments.', translation: 'و ژبیر نەکە شەحنێ بکە! ئەم ناخوازین چو دەمان ژ دەست بدەین.' },
+      { speaker: 'Zana', text: 'Will do! I am really looking forward to this trip. It has been a busy month.', translation: 'دێ ئوها کەم! ئەز ب راستی یێ مۆشتاقم بۆ ڤێ گەشتێ. مەهەکا گەلەک ب ئیش بوو.' },
+      { speaker: 'Hevi', text: 'Me too. The fresh mountain air will be good for our health.', translation: 'ئەز ژی هەمان شێوە. بێهنا فێنک یا چیای دێ بۆ ساخلەمیا مە یا باش بیت.' },
+      { speaker: 'Zana', text: 'I will call you on Friday night to confirm everything. See you then!', translation: 'ئەز دێ شەڤا ئەینیێ تەلەفۆنا تە کەم دا کو هەمی تشتان پشتراست بکەین. دێ تە بینمەڤە!' }
     ],
     vocabulary: [
       { word: 'Weekend', translation: 'دوماهیکا حەفتیێ' },
@@ -1869,9 +1881,20 @@ export const conversations: Conversation[] = [
     titleKurdish: 'چاوپێکەفتنا کاری',
     dialogue: [
       { speaker: 'Interviewer', text: 'Tell me about your previous work experience.', translation: 'بەحسێ ئەزموونا خۆ یا کاری یا بەری نوکە بۆ من بکە.' },
-      { speaker: 'Candidate', text: 'I worked as a software developer for three years. I focused on web applications.', translation: 'من سێ سالان وەک گەشەپێدەرێ سۆفتوێری کار کریە. من گرنگی ب بەرنامەیێن وێبێ ددا.' },
-      { speaker: 'Interviewer', text: 'Why do you want to work for our company?', translation: 'بۆچی تو دخوازێ ل کۆمپانیا مە کار بکەی؟' },
-      { speaker: 'Candidate', text: 'Your company has a great reputation for innovation, and I want to contribute to your success.', translation: 'کۆمپانیا هەوە ناڤودەنگیەکێ باش یێ هەی د بوارێ نووگەریێ دا، و ئەز دخوازم پشکدار ببم د سەرکەفتنا هەوە دا.' }
+      { speaker: 'Candidate', text: 'I worked as a software developer for three years. I focused on developing robust web applications for international clients.', translation: 'من سێ سالان وەک گەشەپێدەرێ سۆفتوێری کار کریە. من گرنگی ب گەشەپێدانا بەرنامەیێن وێبێ یێن ب هێز ددا بۆ بریکارێن نێڤدەولەتی.' },
+      { speaker: 'Interviewer', text: 'That sounds impressive. What technologies are you most proficient in?', translation: 'ئەفە زۆر یا باشە. تۆ د کین تەکنەلۆژیایان دا یێ زیرەکی؟' },
+      { speaker: 'Candidate', text: 'I am very skilled in React, Node.js, and TypeScript. I have also experience with cloud services like AWS.', translation: 'ئەز گەلەک یێ زیرەکم د بوارێن React و Node.js و TypeScript دا. هەروەسا ئەزموونا من دگەل خزمەتگوزاریێن عەور (Cloud) وەک AWS ژی یا هەی.' },
+      { speaker: 'Interviewer', text: 'Why do you want to work for our company specifically?', translation: 'بۆچی تو دخوازێ ل کۆمپانیا مە کار بکەی ب تایبەت؟' },
+      { speaker: 'Candidate', text: 'Your company has a great reputation for innovation and pushing boundaries. I want to contribute my skills to your future success.', translation: 'کۆمپانیا هەوە ناڤودەنگیەکێ باش یێ هەی د بوارێ نووگەریێ و تێپەراندنا ئاستەنگان دا. ئەز دخوازم زیرەکییا خۆ د خزمەتا سەرکەفتنا هەوە دا بکاربینم.' },
+      { speaker: 'Interviewer', text: 'How do you handle difficult challenges or deadlines in a team environment?', translation: 'تۆ چەوا سەرەدەریێ دگەل ئاستەنگێن ب زەحمەت یان دەمێن تەنگ دکەی د ناڤ تیمەکێ دا؟' },
+      { speaker: 'Candidate', text: 'I prioritize tasks based on their impact and communicate clearly with my colleagues to ensure we are all aligned.', translation: 'ئەز کاران ب رێزبەندی ددانم ل دووڤ گرنگییا وان و ب رۆهن و ئاشکرا دگەل هەڤالێن خۆ باخڤم دا کو ئەم هەمی پێکڤە رێک بکەڤین.' },
+      { speaker: 'Interviewer', text: 'Can you give me an example of a problem you solved in your last role?', translation: 'تو دشێی نموونەیەکێ ل سەر کێشەیەکێ بدەی یا کو تە د کارێ خۆ یێ بەری نوکە دا چارەسەر کری؟' },
+      { speaker: 'Candidate', text: 'Once, we had a major bug during a product launch. I stayed late to debug the code and found a solution within hours.', translation: 'جارهەکێ، مە کێشەیەکا مەزن یێ تەکنیکی هەبوو د دەمێ بەلاڤکرنا بەرهەمەکی دا. ئەز درەنگ مام دا کو کێشەیێ چارەسەر بکەم و من د ناڤ چەند دەمژمێران دا چارەسەری دیت.' },
+      { speaker: 'Interviewer', text: 'Excellent. What are your salary expectations for this position?', translation: 'زۆر نایابە. هزر و پێشبینیا تە بۆ مووچەی بۆ ڤی پوستی چییە؟' },
+      { speaker: 'Candidate', text: 'Based on my experience and current market rates, I am looking for something competitive. We can discuss the details.', translation: 'ل دووڤ ئەزموونا من و نرخێن بازارێ، ئەز ل تشتەکێ هەڤرک دگەڕێم. ئەم دشێین پاشتر بەحسێ هوورکاتان بکەین.' },
+      { speaker: 'Interviewer', text: 'Fair enough. Do you have any questions for us before we conclude?', translation: 'هزرەکا درۆستە. چو پرسیار ل دەف تە هەنە بەری ئەم ب دوماهیک بینین؟' },
+      { speaker: 'Candidate', text: 'Yes, what does the typical career path look like for someone in this role at your company?', translation: 'بەلێ، شێوازێ پێشڤەچوونا پیشەیی بۆ کەسەکێ د ڤی کارێ دا ل کۆمپانیا هەوە دێ چەوا بیت؟' },
+      { speaker: 'Interviewer', text: 'We encourage growth through continuous learning and mentorship. We will be in touch soon regarding our decision.', translation: 'ئەم پشتەڤانییا پێشڤەچوونێ دکەین ب رێکا فێربوونا بەردەوام و سەرپەرشتیاریکردنێ. ئەم دێ ب زووترین دەم پەیوەندیێ ب تە کەن ل سەر بڕیارا خۆ.' }
     ],
     vocabulary: [
       { word: 'Experience', translation: 'ئەزموون' },
@@ -1889,7 +1912,24 @@ export const conversations: Conversation[] = [
     dialogue: [
       { speaker: 'Karwan', text: 'The impact of climate change is becoming increasingly evident in our region.', translation: 'کارتێکرنا گوهۆڕینا سەقای ب شێوازەکێ زێدەترێ دیار د دەڤەرا مە دا دەردکەڤیت.' },
       { speaker: 'Lana', text: 'Indeed. We need to implement more sustainable practices and reduce our reliance on fossil fuels.', translation: 'راستە. ئەم پێتڤی نە چەندین رێکارێن بەردەوام ئەنجام بدەین و پشتبەستنا خۆ ب سۆتەمنییێن کانی یێ کێم کەین.' },
-      { speaker: 'Karwan', text: 'Government intervention is crucial, but individual responsibility cannot be overlooked either.', translation: 'دەستێوەردانا حکومەتێ یا فەرە، لێ بەرپرسیارەتیا تاکەکەسی ژی نابیت بهێتە پشتگوێخستن.' }
+      { speaker: 'Karwan', text: 'Government intervention is crucial, but individual responsibility cannot be overlooked either.', translation: 'دەستێوەردانا حکومەتێ یا فەرە، لێ بەرپرسیارەتیا تاکەکەسی ژی نابیت بهێتە پشتگوێخستن.' },
+      { speaker: 'Lana', text: 'Education is also key. Younger generations need to understand the long-term consequences of their actions.', translation: 'پەروەردە ژی یا سەرەکییە. نەوەیێن گەنج پێتڤییە تێبگەهن ژ ئەنجامێن دوورمەودا یێن کارێن خۆ.' },
+      { speaker: 'Karwan', text: 'True. But can we really make a difference if major corporations don\'t change their policies?', translation: 'راستە. لێ ئەرێ ئەم ب راستی دشێین گوهۆڕینێ چێکەین ئەگەر کۆمپانیێن مەزن سیاسەتێن خۆ نەگوهۆڕن؟' },
+      { speaker: 'Lana', text: 'It\'s a valid concern. However, consumer demand drives corporate behavior. If we prioritize eco-friendly products, they will adapt.', translation: 'ئەڤە نیشانەکا درۆستە. لێ هەرچەندە، داخوازیا بەکاربەران سەرەدەریێ دگەل رەفتارێن کۆمپانیان دکەت. ئەگەر ئەم گرنگیێ بدەینە بەرهەمێن پارێزەرێن ژینگەی، ئەو دێ خۆ گونجینن.' },
+      { speaker: 'Karwan', text: 'What about renewable energy resources in Kurdistan? We have plenty of sun and wind.', translation: 'پا دەربارەی ژێدەرێن ووزەیا نوو ل کوردستانێ؟ مە رۆژ و بایەکێ زۆر یێ هەی.' },
+      { speaker: 'Lana', text: 'We do, but the infrastructure for solar and wind farms requires significant investment and political will.', translation: 'بەلێ مە یا هەی، لێ ژێرخانا کێلگەهێن رۆژێ و بای پێتڤی ب وەبەرهێنانەکا مەزن و ئیرادەکا سیاسی هەیە.' },
+      { speaker: 'Karwan', text: 'I\'ve seen some small-scale solar projects in rural areas. They seem promising.', translation: 'من هندەک پرۆژەیێن بچووک یێن ووزەیا رۆژێ ل دەڤەرێن گوندەواری دیتینە. دیارە یێن ب هیڤی نە.' },
+      { speaker: 'Lana', text: 'Small steps lead to big changes. We should also focus on reforestation to combat desertification.', translation: 'پێنگاڤێن بچووک دبنە ئەگەرێ گوهۆڕینێن مەزن. پێتڤییە ئەم گرنگیێ بدەینە دارچاندنێ ژی دا کو بەرهەنگارییا بیابانبوونێ بکەین.' },
+      { speaker: 'Karwan', text: 'Planting more trees would definitely help with the rising temperatures during summer.', translation: 'چاندنا دارێن پتر بێگومان دێ هاریکار بیت دگەل بلندبوونا پلەیێن گەرمێ ل هاڤینێ.' },
+      { speaker: 'Lana', text: 'And it would preserve biodiversity. We must protect our natural heritage for future generations.', translation: 'و دێ پارێزگاریێ ل جۆراوجۆرییا بایۆلۆژی ژی کەت. ئەم پێتڤی نە میراتێ خۆ یێ سروشتی بۆ نەوەیێن پاشەرۆژێ بپارێزین.' },
+      { speaker: 'Karwan', text: 'It\'s a race against time. We need to act now before we reach a tipping point.', translation: 'ئەڤە هەڤرکییە دگەل دەمی. ئەم پێتڤی نە نوکە کار بکەین بەری ئەم بگەهنە خالەکا نەڤەگەر.' },
+      { speaker: 'Lana', text: 'Agreed. Let\'s start by organizing a community awareness workshop next month.', translation: 'هاوڕام. بلا دەستپێ بکەین ب رێکخستنا وۆرک شۆپەکا هۆشیارییا جڤاکی ل مەها بهێت.' },
+      { speaker: 'Karwan', text: 'Count me in. I\'ll help with the documentation and invitations.', translation: 'من ژی هەژمار بکە. ئەز دێ هاریکاریێ دگەل دۆکۆمێنتکرن و داخوازنامەیا کەم.' },
+      { speaker: 'Lana', text: 'Excellent. Collective action is our most powerful tool against environmental degradation.', translation: 'نایابە. کارێ ب کۆم بهێزترین ئامرازا مە یە دژی تێکچوونا ژینگەی.' },
+      { speaker: 'Karwan', text: 'I\'ve also heard about circular economy. Reusing materials instead of discarding them.', translation: 'من دەربارەی ئابووریا بازنەیی (circular economy) ژی گۆهـ لێ بوویە. دووبارە بکارئینانا کەرەستان ل شوینا هاڤێتنا وان.' },
+      { speaker: 'Lana', text: 'That\'s a vital concept. It minimizes waste and reduces the demand for new raw materials.', translation: 'ئەڤە تێگەهەکێ زۆر فەرە. پاشمایان کێم دکەت و داخوازێ ل سەر کەرەستێن خاڤ یێن نوو کێم دکەت.' },
+      { speaker: 'Karwan', text: 'We should encourage local artisans to use recycled materials in their crafts.', translation: 'پێتڤییە ئەم هاندانا دەستڕەنگینێن ناوخۆیی بکەین کو کەرەستێن دووبارە پاقژکری د کارێن خۆ دا بکاربینن.' },
+      { speaker: 'Lana', text: 'Definitely. It would promote both sustainability and local culture.', translation: 'بێگومان. ئەڤە دێ هەمی بەردەوامیێ و کەلتوورێ ناوخۆیی ژی پێش ئێخیت.' }
     ],
     vocabulary: [
       { word: 'Impact', translation: 'کارتێکرن' },
@@ -1906,9 +1946,32 @@ export const conversations: Conversation[] = [
     title: 'Philosophy of Existence',
     titleKurdish: 'فەلسەفەیا هەبوونی',
     dialogue: [
-      { speaker: 'Professor', text: 'Existentialism posited that individuals define their own meaning in life.', translation: 'فەلسەفەیا هەبوونی (Existentialism) دبێژیت کو تاکەکەسی ب خۆ رامانا ژیانا خۆ دەستنیشان دکەت.' },
-      { speaker: 'Student', text: 'But doesn\'t that lead to a sense of nihilism if there is no inherent objective purpose?', translation: 'لێ ئەرێ ئەڤە نابیتە ئەگەرێ هەستا "نەمانێ" ئەگەر چو مەرهەمەکا رەها و ئامانجەکا بنەرەتی نەبیت؟' },
-      { speaker: 'Professor', text: 'On the contrary, it empowers the human spirit to transcend mere biological existence.', translation: 'ب پێچەوانە، ئەفە هێزێ ددەتە روحا مرۆڤی کو مرۆڤ ژ هەبوونا بایۆلۆژی بهێتە دەر.' }
+      { speaker: 'Professor', text: 'Existentialism posited that individuals define their own meaning in life, emphasizing personal freedom and choice over preordained destiny.', translation: 'فەلسەفەیا هەبوونی (Existentialism) دبێژیت کو تاکەکەسی ب خۆ رامانا ژیانا خۆ دەستنیشان دکەت، و گرنگییێ ب ئازادییا تاکەکەسی و هەلبژارتنێ ددەت ل سەر چارەنڤیسێ پێشوەخت.' },
+      { speaker: 'Student', text: 'But doesn\'t that lead to an overwhelming sense of nihilism if there is no inherent objective purpose or divine framework guiding us?', translation: 'لێ ئەرێ ئەڤە نابیتە ئەگەرێ هەستا "نەمانێ" (nihilism) ئەگەر چو مەرهەمەکا رەها و ئامانجەکا بنەرەتی یان فریمورکەکێ خودایی نەبیت یێ کو مە رێنمایی بکەت؟' },
+      { speaker: 'Professor', text: 'On the contrary, philosophers like Sartre argued that this "radical freedom" allows us to create our own essence through action. We are what we do.', translation: 'ب پێچەوانە، فەلسەفەزانێن وەک سارتەر دبێژن کو ئەڤ "ئازادییا بنەرەتی" رێکا مە خۆش دکەت کو ب هەبوونا خۆ رامانێ درۆست بکەین ب رێکا کارکرنێ. ئەم تشتەنە یێن کو ئەم دکەین.' },
+      { speaker: 'Student', text: 'Then the weight of responsibility must be immense. Every choice we make defines who we are and, by extension, affects our humanity.', translation: 'پا ب ڤی رەنگی گرانییا بەرپرسیاریەتیێ پێتڤییە یا گەلەک مەزن بیت. هەر هەلبژارتنەکا ئەم دکەین مە دەستنیشان دکەت و، ب ئەنجام، کارتێکرنێ ل مرۆڤایەتییا مە دکەت.' },
+      { speaker: 'Professor', text: 'Exactly. It is what Heidegger referred to as "being-in-the-world." We are fundamentally embedded in a context of meaning that we constantly negotiate.', translation: 'ب درۆستی. ئەفە ئەو تشتە یێ "هایدێگەر" ناڤ کری ب "هەبوون-د-جیهانێ-دا". ئەم ب بنەرەتی د ناڤ دەقەکێ رامانێ دا نە یێ کو ئەم هەر دەم گۆتۆبێژێ ل سەر دکەین.' },
+      { speaker: 'Student', text: 'So, meaning is not discovered, but rather constructed through our engagement with existence. Does this mean morality is also subjective then?', translation: 'ئانکو، رامان ناهێتە دیتن، لێ پتر دهێتە ئاڤاکرن ب رێکا پەیوەندیا مە دگەل هەبوونی. ئەرێ ئەڤە رامانا وێ ئەوە کو ئەخلاق ژی تشتەکێ تاکەکەسییە (subjective)؟' },
+      { speaker: 'Professor', text: 'That is a profound question. While individual values vary, the pursuit of authenticity requires us to act in accordance with our beliefs while acknowledging the freedom of others.', translation: 'ئەفە پرسیارەکا کویرە. هەرچەندە بهایێن تاکەکەسی جیاواز بن، لێ ل دویڤ چوون بۆ راستەقینەییێ پێتڤی ب مە دکەت کو ئەم ل دویڤ باوەریا خۆ کار بکەین د دەمەکێ دا کو ئەم دانپێدانێ ب ئازادییا یێن دی بکەین.' },
+      { speaker: 'Student', text: 'It seems existentialism is as much about ethics as it is about the nature of being. It challenges us to live deliberately.', translation: 'دیارە فەلسەفەیا هەبوونی هندێ کو ل سەر ئەخلاقییە، هندێ ژی ل سەر سرۆشتێ هەبوونییە. مە هان ددەت کو ئەم ب ئیرادە و مەرەم بژین.' },
+      { speaker: 'Professor', text: 'Precisely. It avoids the despair of emptiness by filling existence with the courage to create. It is a philosophy of active engagement.', translation: 'ب درۆستی. خوە ژ بێهیڤیبوونا ڤالایێ ددەتە پاش ب پڕکرنا هەبوونی ب وێ قارەمانییێ دا کو مەرەمان چێبکەت. ئەفە فەلسەفەیەکا پشکدارییا ب هێزە.' },
+      { speaker: 'Student', text: 'I see. But let\'s delve deeper into "Angst" or "Existential Dread." It\'s not a negative state but a realization of one\'s absolute freedom.', translation: 'تێگەهشتم. لێ بلا پتر بچینە ناڤ تێگەهێ "دڵەڕاوکی" (Angst) یان "ترسا هەبوونی". ئەڤە نە بارودۆخەکێ نەرێنییە، لێ تێگەهشتنا مرۆڤی یە بۆ ئازادییا خۆ یا رەها.' },
+      { speaker: 'Professor', text: 'Kierkegaard called it "the dizziness of freedom." It\'s the moment we realize we have no excuses for our choices.', translation: 'کیەرکێگۆرد ناڤ لێ کربوو "گێژبوونا ئازادیێ". ئەڤە ئەو دەمەیە یێ کو ئەم تێدە دگەهین کو چو مەرهەم بۆ هەلبژارتنێن مە نینن.' },
+      { speaker: 'Student', text: 'That\'s a terrifying thought, yet somehow liberating. It means we aren\'t victims of circumstance.', translation: 'ئەڤە هزرەکا ترسناکە، لێ ب رەنگەکێ دی مرۆڤی ئازاد دکەت. رامانا وێ ئەوە کو ئەم نە قوربانییێن دەوروبەرێن خۆ نە.' },
+      { speaker: 'Professor', text: 'True. Although we must acknowledge "Facticity"—the things we cannot change, like our place of birth or biology.', translation: 'راستە. هەرچەندە پێتڤییە ئەم دانپێدانێ ب "راستییێن سەپایی" (Facticity) بکەین - ئەو تشتێن ئەم نەشێین بگۆهۆڕین، وەک جهێ ژدایکبوونێ یان بایۆلۆژیا مە.' },
+      { speaker: 'Student', text: 'How does facticity interact with our freedom then?', translation: 'پا چەوا ئەڤ راستییانە کارلێکێ دگەل ئازادییا مە دکەن؟' },
+      { speaker: 'Professor', text: 'Facticity provides the canvas, but our freedom chooses the colors. We cannot choose our starting point, but we choose our direction.', translation: 'راستییەکان تەختەیێ وێنەکێشانێ دابین دکەن، لێ ئازادییا مە رەنگان هەڵدەبژێریت. ئەم نەشێین خالەیا دەستپێکێ هەلبژێرین، لێ ئەم ئاراستەیا خۆ هەڵدەبژێرین.' },
+      { speaker: 'Student', text: 'Living like this forces us to question whether we are living "authentically" or just following the "They-self," as Heidegger put it.', translation: 'ژیان ب ڤی رەنگی مە نەچار دکەت کو پرس بکەین کا ئەرێ ئەم ب "راستی" دژین یان تەنیا ل دووڤ "ئەوێن دی" دچین، وەک هایدێگەر دبێژیت.' },
+      { speaker: 'Professor', text: 'The "They-self" is the comfortable, anonymous way of being where one does what "one" does, avoiding the burden of individual choice.', translation: '"ئەوێن دی" رێکەکا گونجای و بێ ناڤ و نیشانە بۆ هەبوونێ، کو مرۆڤ تشتەکێ دکەت یێ کو "خەلک" دکەت، و خوە ژ گرانیا بەرپرسیارەتیا هەلبژارتنێن تاکەکەسی ددوویر دکەت.' },
+      { speaker: 'Student', text: 'Thank you, Professor. This perspective transforms my understanding of human agency and the significance of our choices.', translation: 'سوپاس، پڕۆفیسۆر. ئەڤ دیدەگا گوهۆڕینێ د تێگەهشتنا من دا دکەت بۆ شیانێن مرۆڤی و گرنگییا هەلبژارتنێن مە.' },
+      { speaker: 'Professor', text: 'One last point: Sartre emphasized "Commitment" (Engagement). Without it, freedom is just a void. By choosing a cause, we give structure to our existence.', translation: 'خالەکا دوماهیکێ: سارتەر گرنگی ددا ب "پەیمان" (Engagement). بێی وێ، ئازادی تەنیا ڤالاتییەکە. ب هەلبژارتنا مەرەمەکێ، ئەم رێکوپێکییێ ددەینە هەبوونا خۆ.' },
+      { speaker: 'Student', text: 'Does this mean that even a mistake is better than inaction?', translation: 'ئەرێ ئەڤە رامانا وێ ئەوە کو تەنانەت خەلەتی ژی باشترە ژ بێدەنگی و بێکاریێ؟' },
+      { speaker: 'Professor', text: 'In a sense, yes. Inaction is also a choice, but it\'s a choice to be passive. Actively choosing is an assertion of one\'s being.', translation: 'ب رەنگەکی، بەلێ. بێکاری ژی هەلبژاردنەکە، لێ هەلبژاردنەکە کو مرۆڤ یێ نەرێنی بیت. هەلبژاردنا چالاکانە سەلماندنا هەبوونا مرۆڤی یە.' },
+      { speaker: 'Student', text: 'I recently read about "Existential Despair." How does it differ from ordinary sadness?', translation: 'من ئەڤ دووماهییە دەربارەی "بێهیڤیبوونا هەبوونی" خواند. ئەڤە چ جیاوازی دگەل خەمگینیا ئاسایی هەیە؟' },
+      { speaker: 'Professor', text: 'Despair arises when our "project"—the thing we built our life around—collapses. It\'s the loss of our primary meaning.', translation: '"بێهیڤیبوون" دەمێ پەیدا دبیت کو "پرۆژێ" مە یێ ژیانێ - ئەو تشتێ مە ژیانا خۆ ل دەور ئاڤاکری - دهەرفیت. ئەڤە ژ دەستدانا رامانا مە یا سەرەکییە.' },
+      { speaker: 'Student', text: 'And the way out is to build a new project? To re-invent oneself?', translation: 'و رێکا دەربازبوونێ ئەوە کو ئەم پرۆژەکێ نوو ئاڤا بکەین؟ دا کو مرۆڤ خۆ ژ نوو درۆست بکەتەڤە؟' },
+      { speaker: 'Professor', text: 'Exactly. It requires what Nietzsche called "self-overcoming." Treating one\'s life as a creative work of art.', translation: 'ب درۆستی. ئەڤە پێتڤی ب وێ چەندێ هەیە یا نیچە دبێژیتێ "خۆ-تێپەراندن". مرۆڤ سەرهدەریێ دگەل ژیانا خۆ بکەت وەک کارەکێ هونەری یێ داهێنەرانە.' },
+      { speaker: 'Student', text: 'It\'s a beautiful and challenging way to live. I will carry these reflections with me on my path.', translation: 'ئەڤە رێگایەکا جوان و ب زەحمەتە بۆ ژیانێ. ئەز دێ ڤان هزران دگەل خۆ بەم د ژیانا خۆ دا.' }
     ],
     vocabulary: [
       { word: 'Posited', translation: 'دانان / پێشنیارکرن' },

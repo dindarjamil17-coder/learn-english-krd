@@ -16,8 +16,32 @@ interface ConversationViewProps {
 export default function ConversationView({ onBack }: ConversationViewProps) {
   const [selectedLevel, setSelectedLevel] = useState<Level | null>(null);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [isLiked, setIsLiked] = useState(false);
+  const [copiedLine, setCopiedLine] = useState<number | null>(null);
 
   const levels: Level[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+
+  const handleShare = () => {
+    if (selectedConversation) {
+      const text = `English Conversation: ${selectedConversation.title}\n${selectedConversation.titleKurdish}\n\nLearn English with Kurdish translation!`;
+      navigator.clipboard.writeText(text);
+      alert('نیشانەکا گفتوگۆیێ هاتە کۆپی کرن! (Conversation info copied!)');
+    }
+  };
+
+  const handleSpeak = (text: string) => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleCopyLine = (text: string, translation: string, idx: number) => {
+    const fullText = `${text}\n${translation}`;
+    navigator.clipboard.writeText(fullText);
+    setCopiedLine(idx);
+    setTimeout(() => setCopiedLine(null), 2000);
+  };
 
   const filteredConversations = conversations.filter(c => c.level === selectedLevel);
 
@@ -64,10 +88,16 @@ export default function ConversationView({ onBack }: ConversationViewProps) {
             <p className="text-stone-500 font-medium italic">{selectedConversation.title}</p>
           </div>
           <div className="flex gap-2">
-            <button className="p-3 bg-white rounded-2xl shadow-sm hover:shadow-md text-stone-400 hover:text-rose-500 transition-all">
-              <Heart size={20} />
+            <button 
+              onClick={() => setIsLiked(!isLiked)}
+              className={`p-3 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all ${isLiked ? 'text-rose-500 scale-110' : 'text-stone-400 hover:text-rose-500'}`}
+            >
+              <Heart size={20} fill={isLiked ? "currentColor" : "none"} />
             </button>
-            <button className="p-3 bg-white rounded-2xl shadow-sm hover:shadow-md text-stone-400 hover:text-blue-500 transition-all">
+            <button 
+              onClick={handleShare}
+              className="p-3 bg-white rounded-2xl shadow-sm hover:shadow-md text-stone-400 hover:text-blue-500 transition-all"
+            >
               <Share2 size={20} />
             </button>
           </div>
@@ -80,29 +110,68 @@ export default function ConversationView({ onBack }: ConversationViewProps) {
             <span className="font-black text-lg kurdish-text">گفتوگۆ (Dialogue)</span>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {selectedConversation.dialogue.map((line, idx) => (
               <motion.div 
                 key={idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className={`flex flex-col ${idx % 2 === 0 ? 'items-start' : 'items-end'}`}
+                initial={{ opacity: 0, x: idx % 2 === 0 ? -20 : 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
+                className={`flex ${idx % 2 === 0 ? 'justify-start' : 'justify-end'}`}
               >
-                <div className={`max-w-[85%] space-y-2 ${idx % 2 === 0 ? 'text-left' : 'text-right'}`}>
-                  <span className="text-xs font-black text-stone-400 uppercase tracking-widest px-2">
-                    {line.speaker}
-                  </span>
-                  <div className={`p-5 rounded-[2rem] shadow-sm ${
+                <div className={`max-w-[85%] sm:max-w-[75%] space-y-1 ${idx % 2 === 0 ? 'items-start' : 'items-end flex flex-col'}`}>
+                  <div className="flex items-center gap-2 mb-1 px-2">
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${idx % 2 === 0 ? 'text-stone-400' : 'text-stone-400'}`}>
+                      {line.speaker}
+                    </span>
+                  </div>
+                  
+                  <div className={`relative group p-5 md:p-6 rounded-[2rem] shadow-xl transition-all duration-300 hover:scale-[1.02] ${
                     idx % 2 === 0 
-                      ? 'bg-stone-50 rounded-tl-none border-stone-100 border' 
-                      : 'bg-[#e67e22] text-white rounded-tr-none shadow-[#e67e22]/20'
+                      ? 'bg-gradient-to-br from-white to-stone-50 rounded-tl-none border border-stone-100' 
+                      : 'bg-gradient-to-br from-[#e67e22] to-[#d35400] text-white rounded-tr-none shadow-[#e67e22]/20'
                   }`}>
-                    <p className="text-lg font-medium leading-relaxed">{line.text}</p>
-                    <div className={`mt-2 pt-2 border-t kurdish-text font-bold text-sm ${
-                      idx % 2 === 0 ? 'border-stone-200 text-stone-600' : 'border-white/20 text-white/90'
-                    }`}>
-                      {line.translation}
+                    {/* Decorative bubble tail */}
+                    <div className={`absolute top-0 w-4 h-4 ${
+                      idx % 2 === 0 
+                        ? '-left-2 bg-white -z-10 rounded-full border-l border-t border-stone-100' 
+                        : '-right-2 bg-[#e67e22] -z-10 rounded-full'
+                    }`} />
+
+                    <div className="flex flex-col gap-3">
+                      <p className={`text-lg md:text-xl font-bold english-text leading-tight tracking-wide ${
+                        idx % 2 === 0 ? 'text-[#2c3e50]' : 'text-white'
+                      }`}>
+                        {line.text}
+                      </p>
+                      
+                      <div className={`h-[1px] w-full ${
+                        idx % 2 === 0 ? 'bg-stone-200' : 'bg-white/20'
+                      }`} />
+                      
+                      <p className={`text-base md:text-lg kurdish-text font-bold leading-relaxed ${
+                        idx % 2 === 0 ? 'text-stone-600' : 'text-white/95'
+                      }`}>
+                        {line.translation}
+                      </p>
+                    </div>
+
+                    {/* Quick Action Icons */}
+                    <div className={`absolute bottom-3 ${idx % 2 === 0 ? 'right-4' : 'left-4'} flex items-center gap-3 opacity-0 group-hover:opacity-60 transition-opacity`}>
+                      <button 
+                        onClick={() => handleSpeak(line.text)}
+                        className={`p-1.5 rounded-lg transition-colors ${idx % 2 === 0 ? 'hover:bg-stone-200 text-stone-600' : 'hover:bg-white/20 text-white'}`}
+                        title="گوهداری (Speak)"
+                      >
+                        <Volume2 size={16} />
+                      </button>
+                      <button 
+                        onClick={() => handleCopyLine(line.text, line.translation, idx)}
+                        className={`p-1.5 rounded-lg transition-colors ${idx % 2 === 0 ? 'hover:bg-stone-200 text-stone-600' : 'hover:bg-white/20 text-white'}`}
+                        title="کۆپی کرن (Copy)"
+                      >
+                        {copiedLine === idx ? <Sparkles size={16} className="text-emerald-500" /> : <Bookmark size={16} />}
+                      </button>
                     </div>
                   </div>
                 </div>
