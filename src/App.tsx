@@ -12,11 +12,11 @@ import {
   Globe, Languages, Star, Clock, Heart,
   HelpCircle, BookmarkCheck, CheckCircle2,
   ChevronLeft, Trash2, ChevronDown,
-  Gauge, AlertCircle, UserRound, Info, Send, Camera, Save,
+  Gauge, AlertCircle, Info, Send, Save,
   ChevronRight, Bot, MessageSquare, MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { WordEntry, Level, ViewMode, UserProfile, Story, StoryQuestion } from './types';
+import { WordEntry, Level, ViewMode, Story, StoryQuestion } from './types';
 import { 
   ALL_A1_WORDS, ALL_A2_WORDS, ALL_B1_WORDS, ALL_B2_WORDS, ALL_C1_WORDS, ALL_C2_WORDS 
 } from './data/words';

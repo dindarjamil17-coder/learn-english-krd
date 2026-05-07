@@ -76,13 +76,10 @@ async function startServer() {
     });
   }
 
-  // For Vercel, we don't call app.listen()
-  if (process.env.NODE_ENV !== "production") {
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`Server started successfully on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    });
-  }
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server started successfully on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
 
   return app;
 }
