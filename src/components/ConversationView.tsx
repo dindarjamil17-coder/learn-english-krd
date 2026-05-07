@@ -25,7 +25,8 @@ export default function ConversationView({ onBack }: ConversationViewProps) {
     if (selectedConversation) {
       const text = `English Conversation: ${selectedConversation.title}\n${selectedConversation.titleKurdish}\n\nLearn English with Kurdish translation!`;
       navigator.clipboard.writeText(text);
-      alert('نیشانەکا گفتوگۆیێ هاتە کۆپی کرن! (Conversation info copied!)');
+      setCopiedLine(-1); // Use -1 for global copy feedback
+      setTimeout(() => setCopiedLine(null), 2000);
     }
   };
 
@@ -120,55 +121,49 @@ export default function ConversationView({ onBack }: ConversationViewProps) {
                 className={`flex ${idx % 2 === 0 ? 'justify-start' : 'justify-end'}`}
               >
                 <div className={`max-w-[85%] sm:max-w-[75%] space-y-1 ${idx % 2 === 0 ? 'items-start' : 'items-end flex flex-col'}`}>
-                  <div className="flex items-center gap-2 mb-1 px-2">
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${idx % 2 === 0 ? 'text-stone-400' : 'text-stone-400'}`}>
+                  <div className={`flex flex-col ${idx % 2 === 0 ? 'items-start' : 'items-end'}`}>
+                    <div className={`flex items-center gap-2 mb-1 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                      idx % 2 === 0 ? 'bg-stone-100 text-stone-500' : 'bg-[#e67e22]/10 text-[#e67e22]'
+                    }`}>
+                      <Users size={12} />
                       {line.speaker}
-                    </span>
+                    </div>
                   </div>
                   
-                  <div className={`relative group p-5 md:p-6 rounded-[2rem] shadow-xl transition-all duration-300 hover:scale-[1.02] ${
+                  <div className={`relative group p-6 md:p-8 rounded-[2.5rem] shadow-xl transition-all duration-300 hover:scale-[1.01] ${
                     idx % 2 === 0 
-                      ? 'bg-gradient-to-br from-white to-stone-50 rounded-tl-none border border-stone-100' 
-                      : 'bg-gradient-to-br from-[#e67e22] to-[#d35400] text-white rounded-tr-none shadow-[#e67e22]/20'
+                      ? 'bg-white rounded-tl-none border border-stone-100' 
+                      : 'bg-stone-800 text-white rounded-tr-none shadow-stone-200/50'
                   }`}>
-                    {/* Decorative bubble tail */}
-                    <div className={`absolute top-0 w-4 h-4 ${
-                      idx % 2 === 0 
-                        ? '-left-2 bg-white -z-10 rounded-full border-l border-t border-stone-100' 
-                        : '-right-2 bg-[#e67e22] -z-10 rounded-full'
-                    }`} />
-
-                    <div className="flex flex-col gap-3">
-                      <p className={`text-lg md:text-xl font-bold english-text leading-tight tracking-wide ${
+                    <div className="flex flex-col gap-4">
+                      <p className={`text-xl md:text-2xl font-bold english-text leading-tight tracking-wide ${
                         idx % 2 === 0 ? 'text-[#2c3e50]' : 'text-white'
                       }`}>
                         {line.text}
                       </p>
                       
-                      <div className={`h-[1px] w-full ${
-                        idx % 2 === 0 ? 'bg-stone-200' : 'bg-white/20'
+                      <div className={`h-[2px] w-12 rounded-full ${
+                        idx % 2 === 0 ? 'bg-[#e67e22]/30' : 'bg-white/30'
                       }`} />
                       
-                      <p className={`text-base md:text-lg kurdish-text font-bold leading-relaxed ${
-                        idx % 2 === 0 ? 'text-stone-600' : 'text-white/95'
+                      <p className={`text-lg md:text-xl kurdish-text font-bold leading-relaxed ${
+                        idx % 2 === 0 ? 'text-stone-600' : 'text-stone-300'
                       }`}>
                         {line.translation}
                       </p>
                     </div>
 
-                    {/* Quick Action Icons */}
-                    <div className={`absolute bottom-3 ${idx % 2 === 0 ? 'right-4' : 'left-4'} flex items-center gap-3 opacity-0 group-hover:opacity-60 transition-opacity`}>
+                    {/* Action Icons - Visible for better accessibility */}
+                    <div className={`absolute bottom-3 ${idx % 2 === 0 ? 'right-4' : 'left-4'} flex items-center gap-3 opacity-40 group-hover:opacity-100 transition-opacity`}>
                       <button 
                         onClick={() => handleSpeak(line.text)}
                         className={`p-1.5 rounded-lg transition-colors ${idx % 2 === 0 ? 'hover:bg-stone-200 text-stone-600' : 'hover:bg-white/20 text-white'}`}
-                        title="گوهداری (Speak)"
                       >
                         <Volume2 size={16} />
                       </button>
                       <button 
                         onClick={() => handleCopyLine(line.text, line.translation, idx)}
                         className={`p-1.5 rounded-lg transition-colors ${idx % 2 === 0 ? 'hover:bg-stone-200 text-stone-600' : 'hover:bg-white/20 text-white'}`}
-                        title="کۆپی کرن (Copy)"
                       >
                         {copiedLine === idx ? <Sparkles size={16} className="text-emerald-500" /> : <Bookmark size={16} />}
                       </button>

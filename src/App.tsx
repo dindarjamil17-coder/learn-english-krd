@@ -64,13 +64,6 @@ export default function App() {
 
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   
-  const [profile, setProfile] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('user_profile');
-    return saved ? JSON.parse(saved) : null;
-  });
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [tempProfile, setTempProfile] = useState<UserProfile>({ name: '', imageUrl: '' });
-  
   const [learnedWords, setLearnedWords] = useState<Set<string>>(() => {
     const saved = localStorage.getItem('learned_words');
     return saved ? new Set(JSON.parse(saved)) : new Set();
@@ -130,10 +123,6 @@ export default function App() {
   useEffect(() => {
     setCurrentPage(1);
   }, [activeLevel, globalSearchTerm, viewMode]);
-
-  useEffect(() => {
-    localStorage.setItem('user_profile', JSON.stringify(profile));
-  }, [profile]);
 
   useEffect(() => {
     localStorage.setItem('learned_words', JSON.stringify([...learnedWords]));
@@ -330,55 +319,19 @@ export default function App() {
         </div>
         
         <div className="relative z-10 max-w-4xl mx-auto">
-          {/* Profile Section - Improved & Responsive */}
-          <div className="absolute top-0 right-0 p-4 md:p-6 z-50">
-            {profile ? (
-              <button 
-                onClick={() => setShowProfileModal(true)}
-                className="flex items-center gap-2 bg-white/10 hover:bg-white/20 p-1 pr-2 md:p-1.5 md:pr-3 rounded-full transition-all backdrop-blur-md border border-white/20 shadow-lg group"
-              >
-                {profile.imageUrl ? (
-                  <img 
-                    src={profile.imageUrl} 
-                    alt={profile.name} 
-                    className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-[#f1c40f] group-hover:scale-110 transition-transform"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-7 h-7 md:w-9 md:h-9 rounded-full border-2 border-[#f1c40f] bg-stone-100 flex items-center justify-center text-stone-400 group-hover:scale-110 transition-transform">
-                    <UserRound size={18} />
-                  </div>
-                )}
-                <span className="font-bold text-[10px] md:text-sm kurdish-text hidden sm:inline">{profile.name}</span>
-              </button>
-            ) : (
-              <button 
-                onClick={() => {
-                  setTempProfile({ name: '', imageUrl: '' });
-                  setShowProfileModal(true);
-                }}
-                className="flex items-center gap-1.5 bg-[#f1c40f] hover:bg-[#f39c12] text-[#2c3e50] px-3 py-1 md:px-6 md:py-2 rounded-full font-bold transition-all shadow-lg kurdish-text text-[10px] md:text-sm"
-              >
-                <UserRound size={14} className="md:w-5 md:h-5" />
-                <span className="hidden xs:inline">ڤەکرنا ئەکوانتی</span>
-                <span className="xs:hidden">ئەکوانت</span>
-              </button>
-            )}
-          </div>
-
           <div className="flex justify-center gap-8 mb-10">
-            <motion.div
-              whileHover={{ y: -5, scale: 1.05 }}
-              className="relative"
-            >
-              <img 
-                src="https://wallpapers.com/images/hd/kurdish_-flag_-grunge_-style-ii5gw90487tdmurd.jpg" 
-                alt="Kurdistan Flag" 
-                className="w-24 h-14 object-cover rounded-xl shadow-2xl border-2 border-white/20"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full border-2 border-[#2c3e50]" />
-            </motion.div>
+              <motion.div
+                whileHover={{ y: -5, scale: 1.05 }}
+                className="relative"
+              >
+                <img 
+                  src="https://media.istockphoto.com/id/588968896/photo/flag-of-kurdistan.jpg?s=612x612&w=0&k=20&c=MC2MZnWkbzzQJQfriHrdEXDD2nHYUacxlCA61JVBobs=" 
+                  alt="Kurdistan Flag" 
+                  className="w-24 h-14 object-cover rounded-xl shadow-2xl border-2 border-white/20"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full border-2 border-[#2c3e50]" />
+              </motion.div>
             <motion.div
               whileHover={{ y: -5, scale: 1.05 }}
               className="relative"
@@ -1486,112 +1439,6 @@ export default function App() {
           </AnimatePresence>
         </div>
       </main>
-
-      {/* Profile Modal */}
-      <AnimatePresence>
-        {showProfileModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowProfileModal(false)}
-              className="absolute inset-0 bg-stone-900/60 backdrop-blur-sm"
-            />
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden"
-            >
-              <div className="bg-[#2c3e50] p-8 text-white text-center relative">
-                <button 
-                  onClick={() => setShowProfileModal(false)}
-                  className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
-                >
-                  <X size={20} />
-                </button>
-                <div className="relative inline-block mb-4">
-                  <div className="w-24 h-24 rounded-full border-4 border-[#f1c40f] overflow-hidden bg-stone-100 group relative flex items-center justify-center text-stone-400">
-                    {tempProfile.imageUrl || profile?.imageUrl ? (
-                      <img 
-                        src={tempProfile.imageUrl || profile?.imageUrl || ""} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <UserRound size={48} />
-                    )}
-                    <label className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                      <Camera className="text-white" size={24} />
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              setTempProfile(prev => ({ ...prev, imageUrl: reader.result as string }));
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                    </label>
-                  </div>
-                </div>
-                <h3 className="text-2xl font-bold kurdish-text">پڕۆفایلێ تە</h3>
-                <p className="text-stone-400 text-sm kurdish-text">ناڤ و وێنەیێ خۆ دیار بکە</p>
-              </div>
-
-              <div className="p-8 space-y-6">
-                <div>
-                  <label className="block text-stone-400 text-[10px] font-bold uppercase tracking-widest mb-2 kurdish-text">ناڤێ تە</label>
-                  <input 
-                    type="text" 
-                    placeholder="ناڤێ خۆ بنڤیسە..."
-                    value={tempProfile.name || (profile?.name || '')}
-                    onChange={(e) => setTempProfile(prev => ({ ...prev, name: e.target.value }))}
-                    className="w-full bg-stone-50 border-2 border-stone-100 rounded-2xl py-4 px-6 text-stone-800 placeholder-stone-400 focus:outline-none focus:border-[#2c3e50] transition-all kurdish-text"
-                  />
-                </div>
-
-                <div className="flex gap-4">
-                  <button 
-                    onClick={() => {
-                      if (tempProfile.name || profile?.name) {
-                        setProfile({
-                          name: tempProfile.name || profile?.name || 'User',
-                          imageUrl: tempProfile.imageUrl || profile?.imageUrl || ""
-                        });
-                        setShowProfileModal(false);
-                      }
-                    }}
-                    className="flex-1 bg-[#2c3e50] text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-[#34495e] transition-all flex items-center justify-center gap-2 kurdish-text"
-                  >
-                    <Save size={20} />
-                    پاشکەفتن
-                  </button>
-                  {profile && (
-                    <button 
-                      onClick={() => {
-                        setProfile(null);
-                        setShowProfileModal(false);
-                      }}
-                      className="bg-red-50 text-red-500 px-6 py-4 rounded-2xl font-bold hover:bg-red-100 transition-all kurdish-text"
-                    >
-                      دەرکەفتن
-                    </button>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       {/* Footer */}
       <footer className="bg-[#2c3e50] text-white py-12 mt-12 text-center">
