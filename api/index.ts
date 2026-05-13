@@ -22,6 +22,10 @@ const getUsers = () => {
 };
 
 // API Routes
+app.get("/api", (req, res) => {
+  res.json({ message: "Learn English Badini API", status: "online" });
+});
+
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   const users = getUsers();
