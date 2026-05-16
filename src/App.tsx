@@ -30,6 +30,7 @@ import Chatbot from './components/Chatbot';
 import SocialLinks from './components/SocialLinks';
 import VideoTranslator from './components/VideoTranslator';
 import ConversationView from './components/ConversationView';
+import { Analytics } from '@vercel/analytics/react';
 
 const LEVELS: { id: Level; title: string; count: number }[] = [
   { id: 'A1', title: 'ئاستێ ئێکێ - ١٠٠٠ پەیڤ', count: 1000 },
@@ -543,7 +544,7 @@ export default function App() {
                  viewMode === 'translator' ? 'وەرگێڕێ ئنگلیزی بۆ کوردی و بەروڤاژی' :
                  viewMode === 'chat' ? 'دگەل ڕۆبۆتی باخڤە ب بادینی' :
                  viewMode === 'video-translator' ? 'وەرگێڕانا سەبتایتلێن ڤیدیۆیێ بۆ بادینی' :
-                 viewMode === 'conversations' ? 'فێربوونا ئنگلیزی ب رێکا گفتوگۆیان' :
+                 viewMode === 'conversations' ? 'فێربوونا ئنگل��زی ب رێکا گفتوگۆیان' :
                  'لیستا پەیڤێن تە خەزنکرین'}
               </p>
             </div>
@@ -1318,7 +1319,7 @@ export default function App() {
                             activeLevel === 'B1' ? `Intermediate - ${currentLevelWords.length} پەیڤێن ئاستێ سێ` :
                             activeLevel === 'B2' ? `Upper Intermediate - ${currentLevelWords.length} پەیڤێن ئاستێ چوار` :
                             activeLevel === 'C1' ? `Advanced Level - ${currentLevelWords.length} پەیڤێن ئاستێ پێنج` :
-                            `Expert Level - ${currentLevelWords.length} پەیڤێن ئاستێ شەش`
+                            `Expert Level - ${currentLevelWords.length} پەیڤێن ئاستێ شە��`
                           }`
                       }
                     </span>
@@ -1448,6 +1449,8 @@ export default function App() {
       </footer>
       {/* Social Links */}
       <SocialLinks />
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   );
 }
