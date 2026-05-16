@@ -7,7 +7,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { 
   Search, Book, BrainCircuit, Quote, BookOpen, 
   List, Sparkles, GraduationCap, Trophy, Bookmark, 
-  Volume2, VolumeX, ArrowRight, PlayCircle,
+  Volume2, VolumeX, ArrowRight, PlayCircle, Video,
   Menu, X, Filter, SortAsc, SortDesc, Zap,
   Globe, Languages, Star, Clock, Heart,
   HelpCircle, BookmarkCheck, CheckCircle2,
@@ -24,9 +24,11 @@ import { PHRASAL_VERBS } from './data/phrasalVerbs';
 import { IDIOMS } from './data/idioms';
 import { MOTIVATIONAL_QUOTES } from './data/motivationalQuotes';
 import { STORIES } from './data/stories';
+import { GRAMMAR_TOPICS, GrammarTopic } from './data/grammar';
 import Translator from './components/Translator';
 import Chatbot from './components/Chatbot';
 import SocialLinks from './components/SocialLinks';
+import VideoTranslator from './components/VideoTranslator';
 import ConversationView from './components/ConversationView';
 
 const LEVELS: { id: Level; title: string; count: number }[] = [
@@ -43,8 +45,10 @@ const VIEW_MODES: { id: ViewMode; label: string; icon: any }[] = [
   { id: 'phrasal', label: 'کردارێن لێکدای', icon: Zap },
   { id: 'idioms', label: 'ئیدیۆمێن ئنگلیزی', icon: Sparkles },
   { id: 'stories', label: 'چیرۆکێن ئنگلیزی', icon: BookOpen },
+  { id: 'grammar', label: 'ڕێزمان (Grammar)', icon: GraduationCap },
   { id: 'translator', label: 'وەرگێڕێ زیرەک', icon: Languages },
   { id: 'chat', label: 'ڕۆبۆتێ زیرەک', icon: MessageSquare },
+  { id: 'video-translator', label: 'وەرگێڕێ ڤیدیۆیان', icon: Video },
   { id: 'conversations', label: 'بەشێ گفتوگۆیان', icon: MessageCircle },
   { id: 'saved', label: 'پەیڤێن خەزنکری', icon: BookmarkCheck },
 ];
@@ -97,6 +101,9 @@ export default function App() {
   const [selectedStoryId, setSelectedStoryId] = useState<string | null>(null);
   const [storyQuizAnswers, setStoryQuizAnswers] = useState<Record<string, number>>({});
   const [showStoryResults, setShowStoryResults] = useState(false);
+
+  // Grammar States
+  const [selectedGrammarId, setSelectedGrammarId] = useState<string | null>(null);
 
   const allWords = useMemo(() => {
     const combined = [
@@ -398,6 +405,17 @@ export default function App() {
             </li>
             <li>
               <button 
+                onClick={() => {
+                  setViewMode('grammar');
+                  setSelectedGrammarId(null);
+                }}
+                className={viewMode === 'grammar' ? 'active' : ''}
+              >
+                <i className="fas fa-graduation-cap"></i> ڕێزمان (Grammar)
+              </button>
+            </li>
+            <li>
+              <button 
                 onClick={() => setViewMode('translator')}
                 className={viewMode === 'translator' ? 'active' : ''}
               >
@@ -426,6 +444,14 @@ export default function App() {
                 className={viewMode === 'chat' ? 'active' : ''}
               >
                 <i className="fas fa-robot"></i> ڕۆبۆتێ زیرەک
+              </button>
+            </li>
+            <li>
+              <button 
+                onClick={() => setViewMode('video-translator')}
+                className={viewMode === 'video-translator' ? 'active' : ''}
+              >
+                <i className="fas fa-video"></i> وەرگێڕێ ڤیدیۆیان
               </button>
             </li>
             <li>
@@ -483,13 +509,15 @@ export default function App() {
             <div className="p-3 bg-[#2c3e50] rounded-2xl text-white shadow-lg">
               {viewMode === 'list' ? <List size={24} /> : 
                viewMode === 'quiz' ? <HelpCircle size={24} /> : 
-                  viewMode === 'phrasal' ? <Zap size={24} /> :
-                  viewMode === 'idioms' ? <Sparkles size={24} /> :
-                  viewMode === 'stories' ? <BookOpen size={24} /> :
-                  viewMode === 'translator' ? <Languages size={24} /> :
-                  viewMode === 'chat' ? <Bot size={24} /> :
-                  viewMode === 'conversations' ? <MessageCircle size={24} /> :
-                  <Book size={24} />}
+               viewMode === 'phrasal' ? <Zap size={24} /> :
+               viewMode === 'idioms' ? <Sparkles size={24} /> :
+               viewMode === 'stories' ? <BookOpen size={24} /> :
+               viewMode === 'grammar' ? <GraduationCap size={24} /> :
+               viewMode === 'translator' ? <Languages size={24} /> :
+               viewMode === 'chat' ? <Bot size={24} /> :
+               viewMode === 'video-translator' ? <Video size={24} /> :
+               viewMode === 'conversations' ? <MessageCircle size={24} /> :
+               <Book size={24} />}
             </div>
             <div>
               <h2 className="text-2xl font-bold text-stone-800 kurdish-text">
@@ -498,8 +526,10 @@ export default function App() {
                  viewMode === 'phrasal' ? 'کردارێن لێکدای' :
                  viewMode === 'idioms' ? 'ئیدیۆمێن ئنگلیزی' :
                  viewMode === 'stories' ? 'چیرۆکێن ئنگلیزی' :
+                 viewMode === 'grammar' ? 'ڕێزمانا ئنگلیزی' :
                  viewMode === 'translator' ? 'وەرگێڕێ زیرەک' :
                  viewMode === 'chat' ? 'ڕۆبۆتێ زیرەک' :
+                 viewMode === 'video-translator' ? 'وەرگێڕێ ڤیدیۆیان' :
                  viewMode === 'conversations' ? 'بەشێ گفتوگۆیان' :
                  'پەیڤێن خەزنکری'}
               </h2>
@@ -509,8 +539,10 @@ export default function App() {
                  viewMode === 'phrasal' ? 'پەیڤێن لێکدای یێن گرنگ' :
                  viewMode === 'idioms' ? 'ئیدیۆمێن زمانێ ئنگلیزی' :
                  viewMode === 'stories' ? 'فێربوونا ئنگلیزی ب چیرۆکان' :
+                 viewMode === 'grammar' ? 'هەمی بابەتێن ڕێزمانێ ب بادینی' :
                  viewMode === 'translator' ? 'وەرگێڕێ ئنگلیزی بۆ کوردی و بەروڤاژی' :
                  viewMode === 'chat' ? 'دگەل ڕۆبۆتی باخڤە ب بادینی' :
+                 viewMode === 'video-translator' ? 'وەرگێڕانا سەبتایتلێن ڤیدیۆیێ بۆ بادینی' :
                  viewMode === 'conversations' ? 'فێربوونا ئنگلیزی ب رێکا گفتوگۆیان' :
                  'لیستا پەیڤێن تە خەزنکرین'}
               </p>
@@ -571,8 +603,186 @@ export default function App() {
               <Translator key="translator-view" onSpeak={(text) => playAudio(text, 'translator')} />
             ) : viewMode === 'chat' ? (
               <Chatbot key="chat-view" />
+            ) : viewMode === 'video-translator' ? (
+              <VideoTranslator key="video-translator-view" />
             ) : viewMode === 'conversations' ? (
               <ConversationView key="conversations-view" />
+            ) : viewMode === 'grammar' ? (
+              <motion.div
+                key="grammar-view"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                {!selectedGrammarId ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {GRAMMAR_TOPICS.map((topic) => (
+                      <motion.button
+                        key={topic.id}
+                        whileHover={{ scale: 1.02, y: -5 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setSelectedGrammarId(topic.id)}
+                        className="bg-white p-8 rounded-[2.5rem] shadow-lg border border-stone-100 text-right hover:shadow-2xl transition-all group relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-stone-50 rounded-bl-[5rem] -mr-16 -mt-16 group-hover:bg-[#2c3e50]/5 transition-colors" />
+                        
+                        <div className="flex items-center justify-between mb-6 relative z-10">
+                          <div className="bg-stone-50 p-4 rounded-2xl text-[#2c3e50] group-hover:bg-[#2c3e50] group-hover:text-white transition-all shadow-sm">
+                            <GraduationCap size={28} />
+                          </div>
+                          <span className="text-[10px] font-black text-[#2c3e50] uppercase tracking-widest bg-[#f1c40f] px-4 py-1.5 rounded-full shadow-sm">
+                            {topic.category}
+                          </span>
+                        </div>
+                        
+                        <div className="relative z-10">
+                          <h3 className="text-2xl font-black text-stone-800 mb-2 kurdish-text group-hover:text-[#2c3e50] transition-colors">
+                            {topic.titleKurdish}
+                          </h3>
+                          <p className="text-stone-400 text-sm font-mono tracking-wider uppercase">
+                            {topic.title}
+                          </p>
+                        </div>
+                        
+                        <div className="mt-6 flex items-center justify-end gap-2 text-[#2c3e50] font-bold text-sm opacity-0 group-hover:opacity-100 transition-all transform translate-x-4 group-hover:translate-x-0">
+                          <span className="kurdish-text">دەستپێبکە</span>
+                          <ArrowRight size={16} />
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-stone-100">
+                    {/* Header */}
+                    <div className="bg-gradient-to-br from-[#2c3e50] to-[#34495e] p-10 md:p-16 text-white relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+                      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#f1c40f]/10 rounded-full -ml-32 -mb-32 blur-3xl" />
+                      
+                      <button 
+                        onClick={() => setSelectedGrammarId(null)}
+                        className="absolute top-8 left-8 bg-white/10 hover:bg-white/20 backdrop-blur-md p-4 rounded-2xl transition-all flex items-center gap-3 border border-white/10 group z-20"
+                      >
+                        <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                        <span className="kurdish-text font-black text-lg">زڤڕین</span>
+                      </button>
+
+                      <div className="text-center relative z-10">
+                        <motion.div
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          className="inline-block bg-[#f1c40f] text-[#2c3e50] px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-6 shadow-lg"
+                        >
+                          {GRAMMAR_TOPICS.find(t => t.id === selectedGrammarId)?.category}
+                        </motion.div>
+                        <h2 className="text-4xl md:text-5xl font-black kurdish-text mb-4 drop-shadow-lg">
+                          {GRAMMAR_TOPICS.find(t => t.id === selectedGrammarId)?.titleKurdish}
+                        </h2>
+                        <p className="text-stone-400 text-xl font-mono tracking-widest uppercase opacity-80">
+                          {GRAMMAR_TOPICS.find(t => t.id === selectedGrammarId)?.title}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-8 md:p-16 space-y-24">
+                      {GRAMMAR_TOPICS.find(t => t.id === selectedGrammarId)?.content.map((section, idx) => (
+                        <motion.div 
+                          key={idx}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          viewport={{ once: true }}
+                          className="relative"
+                        >
+                          <div className="flex items-center gap-6 mb-10">
+                            <div className="w-16 h-16 bg-gradient-to-br from-[#f1c40f] to-[#f39c12] rounded-2xl flex items-center justify-center text-[#2c3e50] text-3xl font-black shadow-xl transform -rotate-6 border-4 border-white">
+                              {idx + 1}
+                            </div>
+                            <h3 className="text-4xl font-black text-stone-800 kurdish-text relative">
+                              {section.rule}
+                              <div className="absolute -bottom-3 right-0 w-full h-2 bg-[#f1c40f]/20 rounded-full" />
+                            </h3>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                            {/* Left Column: Explanation & Structure */}
+                            <div className="xl:col-span-7 space-y-8">
+                              <div className="bg-stone-50 p-8 rounded-[2.5rem] border-r-[12px] border-r-[#2c3e50] shadow-inner">
+                                <p className="text-lg text-stone-700 leading-relaxed kurdish-text font-medium">
+                                  {section.explanation}
+                                </p>
+                              </div>
+
+                              {section.structure && (
+                                <div className="bg-[#2c3e50] p-8 rounded-[2.5rem] text-white shadow-xl relative overflow-hidden group">
+                                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                                    <Zap size={60} />
+                                  </div>
+                                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 mb-4 block kurdish-text">پێکهاتە (Structure)</span>
+                                  <p className="text-3xl md:text-4xl font-black english-text tracking-tight text-[#f1c40f]">
+                                    {section.structure}
+                                  </p>
+                                </div>
+                              )}
+
+                              {section.notes && section.notes.length > 0 && (
+                                <div className="bg-amber-50/50 border-2 border-amber-100 p-8 rounded-[2.5rem] space-y-4">
+                                  <div className="flex items-center gap-2 text-amber-600 mb-2">
+                                    <Info size={20} />
+                                    <span className="font-black kurdish-text text-lg">تێبینیێن گرنگ (Notes)</span>
+                                  </div>
+                                  <ul className="space-y-3">
+                                    {section.notes.map((note, nIdx) => (
+                                      <li key={nIdx} className="flex items-start gap-3 text-stone-600 kurdish-text text-sm leading-relaxed">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
+                                        {note}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Right Column: Examples */}
+                            <div className="xl:col-span-5 space-y-6">
+                              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-400 mb-4 block kurdish-text text-center">نموونە (Examples)</span>
+                              <div className="space-y-4">
+                                {section.examples.map((ex, exIdx) => (
+                                  <motion.div 
+                                    key={exIdx}
+                                    whileHover={{ scale: 1.02, x: -5 }}
+                                    className="bg-white border-2 border-stone-50 p-8 rounded-[2rem] shadow-sm hover:shadow-xl hover:border-[#2c3e50]/10 transition-all relative group"
+                                  >
+                                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <div className="bg-emerald-50 p-2 rounded-lg">
+                                        <CheckCircle2 size={16} className="text-emerald-500" />
+                                      </div>
+                                    </div>
+                                    <div className="space-y-3">
+                                      <p className="text-3xl font-black text-[#2c3e50] english-text leading-tight">{ex.en}</p>
+                                      <p className="text-base text-stone-400 kurdish-text font-bold pr-4 border-r-2 border-stone-100">
+                                        {ex.ku}
+                                      </p>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                    
+                    {/* Footer Tip */}
+                    <div className="bg-stone-50 p-10 text-center border-t border-stone-100">
+                      <div className="inline-flex items-center gap-3 text-[#2c3e50] bg-white px-8 py-4 rounded-2xl shadow-sm border border-stone-200">
+                        <Zap size={20} className="text-[#f1c40f]" />
+                        <span className="kurdish-text font-bold text-lg">بەردەوام بە ل سەر فێربوونێ! تو دێ ب سەرکەڤی.</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
             ) : viewMode === 'stories' ? (
               <motion.div
                 key="stories-view"

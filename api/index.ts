@@ -2,7 +2,6 @@ import express from "express";
 import path from "path";
 import fs from "fs";
 import cookieParser from "cookie-parser";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const app = express();
 
@@ -22,10 +21,6 @@ const getUsers = () => {
 };
 
 // API Routes
-app.get("/api", (req, res) => {
-  res.json({ message: "Learn English Badini API", status: "online" });
-});
-
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
   const users = getUsers();
@@ -63,37 +58,6 @@ app.post("/api/logout", (req, res) => {
   res.json({ success: true });
 });
 
-// Gemini AI Proxy Route
-app.post("/api/ai/generate", async (req, res) => {
-  try {
-    const { prompt, contents, model: requestedModel, config } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server." });
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: requestedModel || "gemini-1.5-flash" });
-
-    let finalContents = contents;
-    if (!finalContents && prompt) {
-      finalContents = [{ role: "user", parts: [{ text: prompt }] }];
-    }
-
-    const result = await model.generateContent({
-      contents: finalContents,
-      generationConfig: config,
-    });
-
-    const response = await result.response;
-    const text = response.text();
-    res.json({ text });
-  } catch (error: any) {
-    console.error("AI Error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate content" });
-  }
-});
-
-// For Vercel, we export the app
+// For Vercel, we don't call app.listen()
+// We export the app instead
 export default app;

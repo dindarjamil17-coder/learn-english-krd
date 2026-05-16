@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, User, Bot, Trash2, Loader2, Volume2, VolumeX } from 'lucide-react';
+import { GoogleGenAI } from "@google/genai";
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Message {
@@ -75,6 +76,14 @@ export const Chatbot: React.FC = () => {
     setIsLoading(true);
 
     try {
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error('API Key missing');
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
+      const model = "gemini-1.5-flash";
+      
       const systemInstruction = `You are a helpful AI assistant that speaks strictly in the Badini Kurdish dialect (as spoken in Duhok and Zakho, Iraq). 
       Your name is "ڕۆبۆتێ زیرەک" (Smart Robot). 
       Always respond in Badini Kurdish. 
@@ -82,34 +91,34 @@ export const Chatbot: React.FC = () => {
       If the user speaks English, you can translate or explain things, but your main response should be in Badini.
       Avoid generic Kurmanji or Sorani. Use local Badini words like 'ئەز', 'دێ', 'من دڤێت', etc.`;
 
+      const chat = ai.chats.create({
+        model,
+        config: {
+          systemInstruction,
+        },
+      });
+
       // We send the whole history for context
       const history = messages.map(m => ({
         role: m.role === 'user' ? 'user' : 'model',
         parts: [{ text: m.text }]
       }));
 
-      const fullPrompt = `${systemInstruction}\n\nChat History:\n${history.map(h => `${h.role}: ${h.parts[0].text}`).join('\n')}\nuser: ${input}`;
-
-      const response = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: fullPrompt,
-          model: "gemini-1.5-flash",
-          config: { temperature: 0.7 }
-        })
+      const response = await ai.models.generateContent({
+        model,
+        contents: [
+          ...history,
+          { role: 'user', parts: [{ text: input }] }
+        ],
+        config: {
+          systemInstruction,
+          temperature: 0.7,
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Connection failed');
-      }
-
-      const data = await response.json();
-      
       const botMessage: Message = {
         role: 'bot',
-        text: data.text || 'ببورە، من نەشیا بەرسڤێ بدەم.',
+        text: response.text || 'ببورە، من نەشیا بەرسڤێ بدەم.',
         timestamp: new Date()
       };
 

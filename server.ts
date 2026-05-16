@@ -3,7 +3,6 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import fs from "fs";
 import cookieParser from "cookie-parser";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 async function startServer() {
   const app = express();
@@ -60,38 +59,6 @@ async function startServer() {
       sameSite: "none",
     });
     res.json({ success: true });
-  });
-
-  // Gemini AI Proxy Route
-  app.post("/api/ai/generate", async (req, res) => {
-    try {
-      const { prompt, contents, model: requestedModel, config } = req.body;
-      const apiKey = process.env.GEMINI_API_KEY;
-
-      if (!apiKey) {
-        return res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server." });
-      }
-
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: requestedModel || "gemini-1.5-flash" });
-
-      let finalContents = contents;
-      if (!finalContents && prompt) {
-        finalContents = [{ role: "user", parts: [{ text: prompt }] }];
-      }
-
-      const result = await model.generateContent({
-        contents: finalContents,
-        generationConfig: config,
-      });
-
-      const response = await result.response;
-      const text = response.text();
-      res.json({ text });
-    } catch (error: any) {
-      console.error("AI Error:", error);
-      res.status(500).json({ error: error.message || "Failed to generate content" });
-    }
   });
 
   // Vite middleware for development

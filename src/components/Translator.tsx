@@ -4,6 +4,7 @@ import {
   Languages, ArrowRightLeft, Copy, Volume2, 
   Loader2, Send, Trash2, Sparkles, AlertCircle 
 } from 'lucide-react';
+import { GoogleGenAI } from "@google/genai";
 
 interface TranslatorProps {
   onSpeak: (text: string) => void;
@@ -24,6 +25,20 @@ export default function Translator({ onSpeak }: TranslatorProps) {
     setError(null);
 
     try {
+      // Try to get API key from multiple possible sources
+      const apiKey = (import.meta.env.VITE_GEMINI_API_KEY as string) || 
+                     (process.env.GEMINI_API_KEY as string) || 
+                     '';
+      
+      if (!apiKey || apiKey === 'undefined' || apiKey === '') {
+        setError('کلیلا وەرگێڕانێ (API Key) نەهاتیە دیتن. هیڤیە ل سەر Vercel کلیلەکێ ب ناڤێ VITE_GEMINI_API_KEY زێدە بکە.');
+        setIsLoading(false);
+        return;
+      }
+
+      const ai = new GoogleGenAI({ apiKey });
+      const model = "gemini-1.5-flash";
+      
       const prompt = sourceLang === 'en' 
         ? `You are a professional translator specializing in the Badini Kurdish dialect (as spoken in Duhok and Zakho, Iraq). 
            Translate the following English text to strictly Badini Kurdish. 
@@ -34,23 +49,15 @@ export default function Translator({ onSpeak }: TranslatorProps) {
            Provide ONLY the translated text.
            Text to translate: "${inputText}"`;
 
-      const response = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          model: "gemini-1.5-flash",
-          config: { temperature: 0.1 }
-        })
+      const result = await ai.models.generateContent({
+        model,
+        contents: [{ parts: [{ text: prompt }] }],
+        config: {
+          temperature: 0.1, // Lower temperature for more consistent and faster results
+        }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Connection failed');
-      }
-
-      const data = await response.json();
-      const text = data.text;
+      const text = result.text;
       
       if (!text) {
         throw new Error('چ ئەنجام ژ ژیرییا دەستکرد نەهاتن.');
@@ -60,8 +67,8 @@ export default function Translator({ onSpeak }: TranslatorProps) {
     } catch (err: any) {
       console.error('Translation error:', err);
       const msg = err?.message || '';
-      if (msg.includes('API_KEY')) {
-        setError('کلیلا (API Key) یا وەرگێڕانێ نەهاتیە ب کارئینان یان یا خەلەتە.');
+      if (msg.includes('API_KEY_INVALID')) {
+        setError('کلیلا (API Key) یا وەرگێڕانێ خەلەتە. هیڤیە پشکنینێ بکە.');
       } else if (msg.includes('quota') || msg.includes('429')) {
         setError('ڕێژەیا وەرگێڕانێ ب دوماهیک هات. هیڤیە پاشتر هەول بدە.');
       } else {
